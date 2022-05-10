@@ -1,28 +1,29 @@
 import {createElement} from '../render.js';
+import { humanazieTripDate, dateDifference } from '../utils.js';
 
-const createNewRoutePointTemplate = () => (
+const createNewRoutePointTemplate = (trip, offer) => (
   `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="2019-03-18">MAR 18</time>
+      <time class="event__date" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 1)}</time>
       <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="img/icons/taxi.png" alt="Event type icon">
+        <img class="event__type-icon" width="42" height="42" src="img/icons/${trip.type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">Taxi Amsterdam</h3>
+      <h3 class="event__title">Taxi ${trip.destination}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+          <time class="event__start-time" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 2)}</time>
           —
-          <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+          <time class="event__end-time" datetime="${trip.dateTo}">${humanazieTripDate(trip.dateTo, 2)}</time>
         </p>
-        <p class="event__duration">30M</p>
+        <p class="event__duration">${dateDifference(trip.dateFrom, trip.dateTo)}</p>
       </div>
       <p class="event__price">
-        €&nbsp;<span class="event__price-value">20</span>
+        €&nbsp;<span class="event__price-value">${trip.basePrice}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
         <li class="event__offer">
-          <span class="event__offer-title">Order Uber</span>
+          <span class="event__offer-title">${offer.offers[trip.offers].title}</span>
           +€&nbsp;
           <span class="event__offer-price">20</span>
         </li>
@@ -40,8 +41,14 @@ const createNewRoutePointTemplate = () => (
   </li>`
 );
 export default class NewRoutePointView {
+  constructor(trip, destination, offer) {
+    this.trip = trip;
+    this.destination = destination;
+    this.offer = offer;
+  }
+
   getTemplate() {
-    return createNewRoutePointTemplate();
+    return createNewRoutePointTemplate(this.trip, this.destination, this.offer);
   }
 
   getElement() {
