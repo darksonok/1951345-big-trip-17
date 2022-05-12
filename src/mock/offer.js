@@ -10,5 +10,10 @@ export const generateOffer = () => ({
       id: 2,
       title: 'Choose the radio station',
       price: 60
+    },
+    {
+      id: 3,
+      title: 'Be kicked from the car by driver',
+      price: 999
     }]
 });

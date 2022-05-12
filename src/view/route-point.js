@@ -1,8 +1,26 @@
 import {createElement} from '../render.js';
 import { humanazieTripDate, dateDifference } from '../utils.js';
 
-const createNewRoutePointTemplate = (trip, offer) => (
-  `<li class="trip-events__item">
+const createNewRoutePointTemplate = (trip, destination, offer) => {
+  let offerPrice = trip.basePrice;
+  const createOffers = (tripData, offerData) => {
+    let offersList = '';
+    for (let i = 0; i < tripData.offers.length; i++) {
+      for (let j = 0; j < offerData.offers.length; j ++) {
+        if(tripData.offers[i] === offerData.offers[j].id) {
+          offersList += `<li class="event__offer">
+            <span class="event__offer-title">${offerData.offers[j].title}</span>
+            +€&nbsp;
+            <span class="event__offer-price">${offerData.offers[j].price}</span>
+            </li>`;
+          offerPrice += offerData.offers[j].price;
+        }
+      }
+    }
+    return offersList;
+  };
+  const offerList = createOffers(trip, offer);
+  return `<li class="trip-events__item">
     <div class="event">
       <time class="event__date" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 1)}</time>
       <div class="event__type">
@@ -18,15 +36,11 @@ const createNewRoutePointTemplate = (trip, offer) => (
         <p class="event__duration">${dateDifference(trip.dateFrom, trip.dateTo)}</p>
       </div>
       <p class="event__price">
-        €&nbsp;<span class="event__price-value">${trip.basePrice}</span>
+        €&nbsp;<span class="event__price-value">${offerPrice}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        <li class="event__offer">
-          <span class="event__offer-title">${offer.offers[trip.offers].title}</span>
-          +€&nbsp;
-          <span class="event__offer-price">20</span>
-        </li>
+      ${offerList}
       </ul>
       <button class="event__favorite-btn event__favorite-btn--active" type="button">
         <span class="visually-hidden">Add to favorite</span>
@@ -38,8 +52,8 @@ const createNewRoutePointTemplate = (trip, offer) => (
         <span class="visually-hidden">Open event</span>
       </button>
     </div>
-  </li>`
-);
+  </li>`;
+};
 export default class NewRoutePointView {
   constructor(trip, destination, offer) {
     this.trip = trip;

@@ -27,7 +27,6 @@ const dateDifference = (dateFrom, dateTo) => {
   }
 };
 
-
 export {
   humanazieTripDate,
   dateDifference

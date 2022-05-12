@@ -5,6 +5,6 @@ export const generateTrip = () => ({
   destination: 'Chamonix',
   id: 0,
   isFavorite: false,
-  offers: 1,
+  offers: [2, 3],
   type: 'taxi'
 });
