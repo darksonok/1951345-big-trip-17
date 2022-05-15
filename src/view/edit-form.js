@@ -2,33 +2,37 @@ import {createElement} from '../render.js';
 import { humanazieTripDate } from '../utils.js';
 
 const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
-  let tripPrice = trip.basePrice;
+  let totalPrice = trip.basePrice;
+
   const inputOffers = () => {
     let offersString = '';
-    for (let i = 0; i < trip.offers.length; i++) {
-      for (let j = 0; j < offer.offers.length; j++) {
-        if(trip.offers[i] === offer.offers[j].id) {
-          offersString += `<div class="event__offer-selector">
+    for (let i = 0; i < offer.offers.length; i++) {
+      const findById = (element) =>{
+        if (element === offer.offers[i].id){
+          return true;
+        }
+
+        return false;
+      };
+      if(trip.offers.find(findById) !== undefined){
+        offersString += `<div class="event__offer-selector">
           <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked="">
             <label class="event__offer-label" for="event-offer-luggage-1">
-             <span class="event__offer-title">${offer.offers[j].title}</span>
+             <span class="event__offer-title">${offer.offers[i].title}</span>
               +€&nbsp;
-             <span class="event__offer-price">${offer.offers[j].price}</span>
+             <span class="event__offer-price">${offer.offers[i].price}</span>
            </label>
            </div>`;
-          tripPrice += offer.offers[j].price;
-          break;
-        }
-        if (i === trip.offers.length - 1) {
-          offersString += `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage">
-            <label class="event__offer-label" for="event-offer-luggage-1">
-             <span class="event__offer-title">${offer.offers[j].title}</span>
-              +€&nbsp;
-             <span class="event__offer-price">${offer.offers[j].price}</span>
-           </label>
-           </div>`;
-        }
+        totalPrice += offer.offers[i].price;
+      }else {
+        offersString += `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" >
+          <label class="event__offer-label" for="event-offer-luggage-1">
+           <span class="event__offer-title">${offer.offers[i].title}</span>
+            +€&nbsp;
+           <span class="event__offer-price">${offer.offers[i].price}</span>
+         </label>
+         </div>`;
       }
     }
     return offersString;
@@ -121,7 +125,7 @@ const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
           <span class="visually-hidden">Price</span>
           €
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${tripPrice}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${totalPrice}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>

@@ -2,24 +2,33 @@ import {createElement} from '../render.js';
 import { humanazieTripDate, dateDifference } from '../utils.js';
 
 const createNewRoutePointTemplate = (trip, destination, offer) => {
-  let offerPrice = trip.basePrice;
   const createOffers = (tripData, offerData) => {
-    let offersList = '';
+    const offersList = [];
     for (let i = 0; i < tripData.offers.length; i++) {
-      for (let j = 0; j < offerData.offers.length; j ++) {
-        if(tripData.offers[i] === offerData.offers[j].id) {
-          offersList += `<li class="event__offer">
-            <span class="event__offer-title">${offerData.offers[j].title}</span>
-            +€&nbsp;
-            <span class="event__offer-price">${offerData.offers[j].price}</span>
-            </li>`;
-          offerPrice += offerData.offers[j].price;
+      const findById = (element) =>{
+        if (element.id === tripData.offers[i]){
+          return true;
         }
-      }
+        return false;
+      };
+      offersList.push(offerData.offers.find(findById));
+
     }
     return offersList;
   };
-  const offerList = createOffers(trip, offer);
+  const createOffersTemplate = (allOffers) => {
+    let offerTempltae = '';
+    for (let i = 0; i < allOffers.length; i++){
+      offerTempltae += `<li class="event__offer">
+            <span class="event__offer-title">${allOffers[i].title}</span>
+            +€&nbsp;
+            <span class="event__offer-price">${allOffers[i].price}</span>
+            </li>`;
+    }
+    return offerTempltae;
+  };
+  const actualOffersList = createOffers(trip, offer);
+  const offerPrice = trip.basePrice + actualOffersList.reduce((prevValue, currValue) => prevValue + currValue.price, 0);
   return `<li class="trip-events__item">
     <div class="event">
       <time class="event__date" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 1)}</time>
@@ -40,7 +49,7 @@ const createNewRoutePointTemplate = (trip, destination, offer) => {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-      ${offerList}
+      ${createOffersTemplate(actualOffersList)}
       </ul>
       <button class="event__favorite-btn event__favorite-btn--active" type="button">
         <span class="visually-hidden">Add to favorite</span>
