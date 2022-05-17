@@ -2,33 +2,8 @@ import {createElement} from '../render.js';
 import { humanazieTripDate, dateDifference } from '../utils.js';
 
 const createNewRoutePointTemplate = (trip, destination, offer) => {
-  const createOffers = (tripData, offerData) => {
-    const offersList = [];
-    for (let i = 0; i < tripData.offers.length; i++) {
-      const findById = (element) =>{
-        if (element.id === tripData.offers[i]){
-          return true;
-        }
-        return false;
-      };
-      offersList.push(offerData.offers.find(findById));
+  const pointTypeOffer = offer.find((offers) => offers.type === trip.type); //Работает, тут уже массив офферов для конкретного типа
 
-    }
-    return offersList;
-  };
-  const createOffersTemplate = (allOffers) => {
-    let offerTempltae = '';
-    for (let i = 0; i < allOffers.length; i++){
-      offerTempltae += `<li class="event__offer">
-            <span class="event__offer-title">${allOffers[i].title}</span>
-            +€&nbsp;
-            <span class="event__offer-price">${allOffers[i].price}</span>
-            </li>`;
-    }
-    return offerTempltae;
-  };
-  const actualOffersList = createOffers(trip, offer);
-  const offerPrice = trip.basePrice + actualOffersList.reduce((prevValue, currValue) => prevValue + currValue.price, 0);
   return `<li class="trip-events__item">
     <div class="event">
       <time class="event__date" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 1)}</time>
@@ -45,11 +20,15 @@ const createNewRoutePointTemplate = (trip, destination, offer) => {
         <p class="event__duration">${dateDifference(trip.dateFrom, trip.dateTo)}</p>
       </div>
       <p class="event__price">
-        €&nbsp;<span class="event__price-value">${offerPrice}</span>
+        €&nbsp;<span class="event__price-value">${trip.basePrice + pointTypeOffer.offers.filter((offerTest) => trip.offers.includes(offerTest.id)).map((offerTest) => offerTest.price).reduce((val1, val2) => val1 + val2)}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-      ${createOffersTemplate(actualOffersList)}
+      ${pointTypeOffer.offers.filter((offerTest) => trip.offers.includes(offerTest.id)).map((offerOne) => `<li class="event__offer">
+      <span class="event__offer-title">${offerOne.title}</span>
+      +€&nbsp;
+      <span class="event__offer-price">${offerOne.price}</span>
+    </li>`)}
       </ul>
       <button class="event__favorite-btn event__favorite-btn--active" type="button">
         <span class="visually-hidden">Add to favorite</span>

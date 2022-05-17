@@ -2,42 +2,8 @@ import {createElement} from '../render.js';
 import { humanazieTripDate } from '../utils.js';
 
 const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
-  let totalPrice = trip.basePrice;
+  const pointTypeOffer = offer.find((offers) => offers.type === trip.type);
 
-  const inputOffers = () => {
-    let offersString = '';
-    for (let i = 0; i < offer.offers.length; i++) {
-      const findById = (element) =>{
-        if (element === offer.offers[i].id){
-          return true;
-        }
-
-        return false;
-      };
-      if(trip.offers.find(findById) !== undefined){
-        offersString += `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked="">
-            <label class="event__offer-label" for="event-offer-luggage-1">
-             <span class="event__offer-title">${offer.offers[i].title}</span>
-              +€&nbsp;
-             <span class="event__offer-price">${offer.offers[i].price}</span>
-           </label>
-           </div>`;
-        totalPrice += offer.offers[i].price;
-      }else {
-        offersString += `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" >
-          <label class="event__offer-label" for="event-offer-luggage-1">
-           <span class="event__offer-title">${offer.offers[i].title}</span>
-            +€&nbsp;
-           <span class="event__offer-price">${offer.offers[i].price}</span>
-         </label>
-         </div>`;
-      }
-    }
-    return offersString;
-  };
-  const offers = inputOffers();
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -125,7 +91,7 @@ const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
           <span class="visually-hidden">Price</span>
           €
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${totalPrice}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${trip.basePrice + pointTypeOffer.offers.filter((offerTest) => trip.offers.includes(offerTest.id)).map((offerTest) => offerTest.price).reduce((val1, val2) => val1 + val2)}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -138,7 +104,16 @@ const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
       <section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
-        ${offers}
+        ${pointTypeOffer.offers.map((offerOne) => {
+    const checked = trip.offers.includes(offerOne.id) ? 'checked' : '';
+    return `<div class="event__offer-selector">
+              <input class="event__offer-checkbox  visually-hidden" id="event-offer-comfort-1" type="checkbox" name="event-offer-comfort" ${checked}>
+              <label class="event__offer-label" for="event-offer-comfort-1">
+                <span class="event__offer-title">${offerOne.title}</span>
+                +€&nbsp;
+                <span class="event__offer-price">${offerOne.price}</span>
+               </label>
+            </div>`})}
           </div>
         </div>
       </section>
