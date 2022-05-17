@@ -113,7 +113,7 @@ const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
                 +€&nbsp;
                 <span class="event__offer-price">${offerOne.price}</span>
                </label>
-            </div>`})}
+            </div>`;})}
           </div>
         </div>
       </section>
