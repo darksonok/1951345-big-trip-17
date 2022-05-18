@@ -4,7 +4,7 @@ import { humanazieTripDate } from '../utils.js';
 const createNewRoutePointEditFormTemplate = (trip, destination, offer) => {
   const pointTypeOffer = offer.find((offers) => offers.type === trip.type);
   const destinationInfo = destination.find((destinationOne) => destinationOne.name === trip.destination);
-  console.log(destinationInfo.pictures);
+
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
