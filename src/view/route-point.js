@@ -28,7 +28,7 @@ const createNewRoutePointTemplate = (trip, destination, offer) => {
       <span class="event__offer-title">${offerOne.title}</span>
       +€&nbsp;
       <span class="event__offer-price">${offerOne.price}</span>
-    </li>`)}
+    </li>`).join('')}
       </ul>
       <button class="event__favorite-btn event__favorite-btn--active" type="button">
         <span class="visually-hidden">Add to favorite</span>

@@ -14,7 +14,7 @@ export default class TripsPresenter {
     this.offers = tripsModel.getOffer();
 
     render(new NewSorterView(), this.tripContainer);
-    render(new NewRoutePointCreatorView, this.tripComponent.getElement());
+    //render(new NewRoutePointCreatorView, this.tripComponent.getElement());
     render(new NewRoutePointEditFormView(this.trips[0], this.destionations, this.offers), this.tripComponent.getElement());
     render(this.tripComponent, this.tripContainer);
     for (let i = 0; i < this.trips.length; i++) {
