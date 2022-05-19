@@ -1,33 +1,33 @@
 import {createElement} from '../render.js';
 import { humanazieTripDate, dateDifference } from '../utils.js';
 
-const createNewRoutePointTemplate = (trip, destination, offer) => {
-  const pointTypeOffer = offer.find((offers) => offers.type === trip.type); //Работает, тут уже массив офферов для конкретного типа
+const createNewRoutePointTemplate = (trip, destinations, offers) => {
+  const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
 
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 1)}</time>
+      <time class="event__date" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 'tripPointDate')}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${trip.type}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">Taxi ${trip.destination}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 2)}</time>
+          <time class="event__start-time" datetime="${trip.dateFrom}">${humanazieTripDate(trip.dateFrom, 'tripPointTime')}</time>
           —
-          <time class="event__end-time" datetime="${trip.dateTo}">${humanazieTripDate(trip.dateTo, 2)}</time>
+          <time class="event__end-time" datetime="${trip.dateTo}">${humanazieTripDate(trip.dateTo, 'tripPointTime')}</time>
         </p>
         <p class="event__duration">${dateDifference(trip.dateFrom, trip.dateTo)}</p>
       </div>
       <p class="event__price">
-        €&nbsp;<span class="event__price-value">${trip.basePrice + pointTypeOffer.offers.filter((offerTest) => trip.offers.includes(offerTest.id)).map((offerTest) => offerTest.price).reduce((val1, val2) => val1 + val2)}</span>
+        €&nbsp;<span class="event__price-value">${trip.basePrice + pointTypeOffer.offers.filter((offer) => trip.offers.includes(offer.id)).map((offer) => offer.price).reduce((val1, val2) => val1 + val2)}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-      ${pointTypeOffer.offers.filter((offerTest) => trip.offers.includes(offerTest.id)).map((offerOne) => `<li class="event__offer">
-      <span class="event__offer-title">${offerOne.title}</span>
+      ${pointTypeOffer.offers.filter((offer) => trip.offers.includes(offer.id)).map((offer) => `<li class="event__offer">
+      <span class="event__offer-title">${offer.title}</span>
       +€&nbsp;
-      <span class="event__offer-price">${offerOne.price}</span>
+      <span class="event__offer-price">${offer.price}</span>
     </li>`).join('')}
       </ul>
       <button class="event__favorite-btn event__favorite-btn--active" type="button">
@@ -43,25 +43,30 @@ const createNewRoutePointTemplate = (trip, destination, offer) => {
   </li>`;
 };
 export default class NewRoutePointView {
-  constructor(trip, destination, offer) {
-    this.trip = trip;
-    this.destination = destination;
-    this.offer = offer;
+  #element = null;
+  #trip = null;
+  #destinations = null;
+  #offers = null;
+
+  constructor(trip, destinations, offers) {
+    this.#trip = trip;
+    this.#destinations = destinations;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createNewRoutePointTemplate(this.trip, this.destination, this.offer);
+  get template() {
+    return createNewRoutePointTemplate(this.#trip, this.#destinations, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
