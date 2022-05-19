@@ -4,19 +4,21 @@ import NewRoutePointView from '../view/route-point.js';
 import NewSorterView from '../view/sorter.js';
 import {render} from '../render.js';
 import NewTripEventsView from '../view/trip-events-view.js';
-import { NUMBER_OF_TRIP_POINTS } from '../data.js';
 export default class TripsPresenter {
   tripComponent = new NewTripEventsView();
 
-  init = (tripContainer) => {
+  init = (tripContainer, tripsModel) => {
     this.tripContainer = tripContainer;
+    this.trips = tripsModel.getTrips();
+    this.destionations = tripsModel.getDestionation();
+    this.offers = tripsModel.getOffer();
 
     render(new NewSorterView(), this.tripContainer);
     render(new NewRoutePointCreatorView, this.tripComponent.getElement());
-    render(new NewRoutePointEditFormView, this.tripComponent.getElement());
+    render(new NewRoutePointEditFormView(this.trips[0], this.destionations, this.offers), this.tripComponent.getElement());
     render(this.tripComponent, this.tripContainer);
-    for (let i = 0; i < NUMBER_OF_TRIP_POINTS; i++) {
-      render(new NewRoutePointView(), this.tripComponent.getElement());
+    for (let i = 0; i < this.trips.length; i++) {
+      render(new NewRoutePointView(this.trips[i], this.destionations, this.offers), this.tripComponent.getElement());
     }
   };
 }
