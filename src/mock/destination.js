@@ -1,4 +1,4 @@
-export const gerenateDestionation = () => ([{
+export const gerenateDestionations = () => ([{
   description: 'Chamonix, is a beautiful city, a true asian pearl, with crowded streets.',
   name: 'Chamonix',
   pictures: [

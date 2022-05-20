@@ -1,4 +1,4 @@
-export const generateOffer = () => ([{
+export const generateOffers = () => ([{
   type: 'taxi',
   offers: [
     {
