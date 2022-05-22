@@ -26,8 +26,18 @@ const dateDifference = (dateFrom, dateTo) => {
   }
 };
 
+const getChosenFilter = () => {
+  const allFiltersInputs = document.querySelectorAll('.trip-filters__filter-input');
+  for (let i = 0; i < allFiltersInputs.length; i++) {
+    if(allFiltersInputs[i].checked) {
+      return allFiltersInputs[i].id;
+    }
+  }
+};
+
 export {
   humanazieTripDate,
-  dateDifference
+  dateDifference,
+  getChosenFilter
 };
 

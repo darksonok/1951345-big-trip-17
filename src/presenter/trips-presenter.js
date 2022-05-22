@@ -3,6 +3,9 @@ import NewRoutePointView from '../view/route-point.js';
 import NewSorterView from '../view/sorter.js';
 import {render} from '../render.js';
 import NewTripEventsView from '../view/trip-events-view.js';
+import NewEmptyListView from '../view/empty-list.js';
+import { getChosenFilter } from '../utils.js';
+
 export default class TripsPresenter {
   #tripContainer = null;
   #tripComponent = new NewTripEventsView();
@@ -17,8 +20,21 @@ export default class TripsPresenter {
 
     render(new NewSorterView(), this.#tripContainer);
     render(this.#tripComponent, this.#tripContainer);
-    for (let i = 0; i < this.#trips.length; i++) {
-      this.#renderTrip(this.#trips[i], this.#destinations, this.#offers);
+    switch(true){
+      case (this.#trips.length === 0 && getChosenFilter() === 'filter-everything'):
+        render(new NewEmptyListView('Click New Event to create your first point'), this.#tripContainer);
+        break;
+      case (this.#trips.length === 0 && getChosenFilter() === 'filter-future'):
+        render(new NewEmptyListView('There are no future events now'), this.#tripContainer);
+        break;
+      case (this.#trips.length === 0 && getChosenFilter() === 'filter-past'):
+        render(new NewEmptyListView('There are no past events now'), this.#tripContainer);
+        break;
+      default:
+        for (let i = 0; i < this.#trips.length; i++) {
+          this.#renderTrip(this.#trips[i], this.#destinations, this.#offers);
+        }
+        break;
     }
   };
 
