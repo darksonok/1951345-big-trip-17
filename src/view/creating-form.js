@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createNewRoutePointCreatorTemplate = () => (
   `<form class="event event--edit" action="#" method="post">
@@ -163,22 +163,9 @@ const createNewRoutePointCreatorTemplate = () => (
   </form>`
 );
 
-export default class NewRoutePointCreatorView {
-  #element = null;
-
+export default class NewRoutePointCreatorView extends AbstractView {
   get template() {
     return createNewRoutePointCreatorTemplate();
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
 }
