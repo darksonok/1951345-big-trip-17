@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanazieTripDate, dateDifference } from '../utils.js';
 
 const createNewRoutePointTemplate = (trip, destinations, offers) => {
@@ -42,13 +42,13 @@ const createNewRoutePointTemplate = (trip, destinations, offers) => {
     </div>
   </li>`;
 };
-export default class NewRoutePointView {
-  #element = null;
+export default class NewRoutePointView extends AbstractView {
   #trip = null;
   #destinations = null;
   #offers = null;
 
   constructor(trip, destinations, offers) {
+    super();
     this.#trip = trip;
     this.#destinations = destinations;
     this.#offers = offers;
@@ -58,15 +58,13 @@ export default class NewRoutePointView {
     return createNewRoutePointTemplate(this.#trip, this.#destinations, this.#offers);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setClickHandler = (cb) => {
+    this._callback.click = cb;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
 
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 }

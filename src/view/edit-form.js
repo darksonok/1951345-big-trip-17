@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanazieTripDate } from '../utils.js';
 
 const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
@@ -100,13 +100,13 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   </li>`;
 };
 
-export default class NewRoutePointEditFormView {
-  #element = null;
+export default class NewRoutePointEditFormView extends AbstractView {
   #trip = null;
   #destinations = null;
   #offers = null;
 
   constructor(trip, destinations, offers) {
+    super();
     this.#trip = trip;
     this.#destinations = destinations;
     this.#offers = offers;
@@ -116,15 +116,23 @@ export default class NewRoutePointEditFormView {
     return createNewRoutePointEditFormTemplate(this.#trip, this.#destinations, this.#offers);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setClickHandler = (cb) => {
+    this._callback.click = cb;
+    this.element.addEventListener('click', this.#clickHandler);
+  };
 
-    return this.#element;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  setFormSubmitHandler = (cb) => {
+    this._callback.formSubmit = cb;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  };
 }

@@ -1,11 +1,11 @@
 import NewRoutePointEditFormView from '../view/edit-form.js';
 import NewRoutePointView from '../view/route-point.js';
 import NewSorterView from '../view/sorter.js';
-import {render} from '../render.js';
+import { render } from '../framework/render.js';
 import NewTripEventsView from '../view/trip-events-view.js';
 import NewEmptyListView from '../view/empty-list.js';
 import { getChosenFilter } from '../utils.js';
-
+import { emptyListMessages } from '../data.js';
 export default class TripsPresenter {
   #tripContainer = null;
   #tripComponent = new NewTripEventsView();
@@ -22,13 +22,13 @@ export default class TripsPresenter {
     render(this.#tripComponent, this.#tripContainer);
     switch(true){
       case (this.#trips.length === 0 && getChosenFilter() === 'filter-everything'):
-        render(new NewEmptyListView('Click New Event to create your first point'), this.#tripContainer);
+        render(new NewEmptyListView(emptyListMessages.EVERYTHING), this.#tripContainer);
         break;
       case (this.#trips.length === 0 && getChosenFilter() === 'filter-future'):
-        render(new NewEmptyListView('There are no future events now'), this.#tripContainer);
+        render(new NewEmptyListView(emptyListMessages.FUTURE), this.#tripContainer);
         break;
       case (this.#trips.length === 0 && getChosenFilter() === 'filter-past'):
-        render(new NewEmptyListView('There are no past events now'), this.#tripContainer);
+        render(new NewEmptyListView(emptyListMessages.PAST), this.#tripContainer);
         break;
       default:
         for (let i = 0; i < this.#trips.length; i++) {
@@ -58,18 +58,17 @@ export default class TripsPresenter {
       }
     };
 
-    oneTripComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    oneTripComponent.setClickHandler(() => {
       openTripEditForm();
       document.addEventListener('keyup', onEscKeyUp);
     });
 
-    tripEditComponent.element.querySelector('form').addEventListener('submit', (evt) => {
-      evt.preventDefault();
+    tripEditComponent.setFormSubmitHandler(() => {
       closeTripEditForm();
       document.removeEventListener('keyup', onEscKeyUp);
     });
 
-    tripEditComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    tripEditComponent.setClickHandler(() => {
       closeTripEditForm();
       document.removeEventListener('keyup', onEscKeyUp);
     });
