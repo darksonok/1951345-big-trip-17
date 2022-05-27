@@ -25,8 +25,8 @@ export default class TripsPresenter {
   }
 
   init = () => {
-    this.#renderTripComponent();
     this.#renderSorter();
+    this.#renderTripComponent();
     this.#renderEmptyList(this.#trips);
     this.#renderTrips(this.#trips, this.#destinations, this.#offers);
   };
@@ -54,16 +54,18 @@ export default class TripsPresenter {
   };
 
   #renderEmptyList = (trips) => {
-    switch(trips.length === 0){
-      case (getChosenFilter() === 'filter-everything'):
-        render(new NewEmptyListView(emptyListMessages.EVERYTHING), this.#tripContainer);
-        break;
-      case (getChosenFilter() === 'filter-future'):
-        render(new NewEmptyListView(emptyListMessages.FUTURE), this.#tripContainer);
-        break;
-      case (getChosenFilter() === 'filter-past'):
-        render(new NewEmptyListView(emptyListMessages.PAST), this.#tripContainer);
-        break;
+    if(trips.length === 0){
+      switch(true){
+        case (getChosenFilter() === 'filter-everything'):
+          render(new NewEmptyListView(emptyListMessages.EVERYTHING), this.#tripContainer);
+          break;
+        case (getChosenFilter() === 'filter-future'):
+          render(new NewEmptyListView(emptyListMessages.FUTURE), this.#tripContainer);
+          break;
+        case (getChosenFilter() === 'filter-past'):
+          render(new NewEmptyListView(emptyListMessages.PAST), this.#tripContainer);
+          break;
+      }
     }
 
   };
