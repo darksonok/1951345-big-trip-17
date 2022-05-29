@@ -118,7 +118,7 @@ export default class NewRoutePointEditFormView extends AbstractView {
 
   setClickHandler = (cb) => {
     this._callback.click = cb;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
 
   #clickHandler = (evt) => {
@@ -133,6 +133,6 @@ export default class NewRoutePointEditFormView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit();
+    this._callback.formSubmit(this.#trip);
   };
 }

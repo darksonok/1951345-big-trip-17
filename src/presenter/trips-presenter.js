@@ -1,79 +1,82 @@
-import NewRoutePointEditFormView from '../view/edit-form.js';
-import NewRoutePointView from '../view/route-point.js';
 import NewSorterView from '../view/sorter.js';
 import { render } from '../framework/render.js';
 import NewTripEventsView from '../view/trip-events-view.js';
 import NewEmptyListView from '../view/empty-list.js';
 import { getChosenFilter } from '../utils.js';
 import { emptyListMessages } from '../data.js';
+import TripPresenter from './trip-presenter.js';
+import { updateItem } from '../utils.js';
+
 export default class TripsPresenter {
+
   #tripContainer = null;
   #tripComponent = new NewTripEventsView();
+  #sorterComponent = new NewSorterView();
   #trips = null;
   #destinations = null;
   #offers = null;
-  init = (tripContainer, tripsModel) => {
+  #tripPresenter = new Map();
+
+  constructor(tripContainer, tripsModel) {
     this.#tripContainer = tripContainer;
     this.#trips = tripsModel.trips;
     this.#destinations = tripsModel.destinations;
     this.#offers = tripsModel.offers;
+  }
 
-    render(new NewSorterView(), this.#tripContainer);
-    render(this.#tripComponent, this.#tripContainer);
-    switch(true){
-      case (this.#trips.length === 0 && getChosenFilter() === 'filter-everything'):
-        render(new NewEmptyListView(emptyListMessages.EVERYTHING), this.#tripContainer);
-        break;
-      case (this.#trips.length === 0 && getChosenFilter() === 'filter-future'):
-        render(new NewEmptyListView(emptyListMessages.FUTURE), this.#tripContainer);
-        break;
-      case (this.#trips.length === 0 && getChosenFilter() === 'filter-past'):
-        render(new NewEmptyListView(emptyListMessages.PAST), this.#tripContainer);
-        break;
-      default:
-        for (let i = 0; i < this.#trips.length; i++) {
-          this.#renderTrip(this.#trips[i], this.#destinations, this.#offers);
-        }
-        break;
-    }
+  init = () => {
+    this.#renderSorter();
+    this.#renderTripComponent();
+    this.#renderEmptyList(this.#trips);
+    this.#renderTrips(this.#trips, this.#destinations, this.#offers);
+  };
+
+  #handleModeChange = () => {
+    this.#tripPresenter.forEach((presenter) => presenter.resetView());
   };
 
   #renderTrip = (trip, destinations, offers) => {
-    const oneTripComponent = new NewRoutePointView(trip, destinations, offers);
-    const tripEditComponent = new NewRoutePointEditFormView(trip, destinations, offers);
+    const tripPresenter = new TripPresenter(this.#tripComponent.element, this.#handleTripUpdate, this.#handleModeChange);
+    tripPresenter.init(trip, destinations, offers);
+    this.#tripPresenter.set(trip.id, tripPresenter);
+  };
 
-    const openTripEditForm = () => {
-      this.#tripComponent.element.replaceChild(tripEditComponent.element, oneTripComponent.element);
-    };
+  #renderTrips = (trips, destinations, offers) => {
+    trips.forEach((trip) => this.#renderTrip(trip, destinations, offers));
+  };
 
-    const closeTripEditForm = () => {
-      this.#tripComponent.element.replaceChild(oneTripComponent.element, tripEditComponent.element);
-    };
+  #renderSorter = () => {
+    render(this.#sorterComponent, this.#tripContainer);
+  };
 
-    const onEscKeyUp = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        closeTripEditForm();
-        document.removeEventListener('keyup', onEscKeyUp);
+  #renderTripComponent = () => {
+    render(this.#tripComponent, this.#tripContainer);
+  };
+
+  #renderEmptyList = (trips) => {
+    if(trips.length === 0){
+      switch(true){
+        case (getChosenFilter() === 'filter-everything'):
+          render(new NewEmptyListView(emptyListMessages.EVERYTHING), this.#tripContainer);
+          break;
+        case (getChosenFilter() === 'filter-future'):
+          render(new NewEmptyListView(emptyListMessages.FUTURE), this.#tripContainer);
+          break;
+        case (getChosenFilter() === 'filter-past'):
+          render(new NewEmptyListView(emptyListMessages.PAST), this.#tripContainer);
+          break;
       }
-    };
+    }
 
-    oneTripComponent.setClickHandler(() => {
-      openTripEditForm();
-      document.addEventListener('keyup', onEscKeyUp);
-    });
+  };
 
-    tripEditComponent.setFormSubmitHandler(() => {
-      closeTripEditForm();
-      document.removeEventListener('keyup', onEscKeyUp);
-    });
+  #clearTripList = () => {
+    this.#tripPresenter.forEach((presenter) => presenter.destroy());
+    this.#tripPresenter.clear();
+  };
 
-    tripEditComponent.setClickHandler(() => {
-      closeTripEditForm();
-      document.removeEventListener('keyup', onEscKeyUp);
-    });
-
-    render(oneTripComponent, this.#tripComponent.element);
+  #handleTripUpdate = (updatedTrip) => {
+    this.#trips = updateItem(this.#trips, updatedTrip);
+    this.#tripPresenter.get(updatedTrip.id).init(updatedTrip, this.#destinations, this.#offers);
   };
 }
-

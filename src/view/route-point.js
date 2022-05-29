@@ -3,6 +3,7 @@ import { humanazieTripDate, dateDifference } from '../utils.js';
 
 const createNewRoutePointTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
+  const favorite = trip.isFavorite? 'event__favorite-btn--active' : '';
 
   return `<li class="trip-events__item">
     <div class="event">
@@ -30,7 +31,7 @@ const createNewRoutePointTemplate = (trip, destinations, offers) => {
       <span class="event__offer-price">${offer.price}</span>
     </li>`).join('')}
       </ul>
-      <button class="event__favorite-btn event__favorite-btn--active" type="button">
+      <button class="event__favorite-btn ${favorite}" type="button">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
           <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"></path>
@@ -60,11 +61,21 @@ export default class NewRoutePointView extends AbstractView {
 
   setClickHandler = (cb) => {
     this._callback.click = cb;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
 
   #clickHandler = (evt) => {
     evt.preventDefault();
     this._callback.click();
+  };
+
+  setFavoriteClickHandler = (cb) => {
+    this._callback.favoriteClick = cb;
+    this.element.querySelector('.event__favorite-icon').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick();
   };
 }
