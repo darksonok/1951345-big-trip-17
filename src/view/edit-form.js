@@ -1,10 +1,9 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanazieTripDate } from '../utils.js';
 
 const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
   const destinationInfo = destinations.find((destination) => destination.name === trip.destination);
-
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -35,12 +34,9 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${trip.type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="Chamonix" list="destination-list-1">
-        <datalist id="destination-list-1">
-          <option value="Amsterdam"></option>
-          <option value="Geneva"></option>
-          <option value="Chamonix"></option>
-        </datalist>
+        <select class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${trip.destination}" >
+        ${destinations.map((destination) => `<option ${destination.name === destinationInfo.name ? 'selected' : ''} value="${destination.name}">${destination.name}</option>`).join('')}
+        </select>
       </div>
 
       <div class="event__field-group  event__field-group--time">
@@ -72,8 +68,8 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
         ${pointTypeOffer.offers.map((offer) => {
     const checked = trip.offers.includes(offer.id) ? 'checked' : '';
     return `<div class="event__offer-selector">
-              <input class="event__offer-checkbox  visually-hidden" id="event-offer-comfort-1" type="checkbox" name="event-offer-comfort" ${checked}>
-              <label class="event__offer-label" for="event-offer-comfort-1">
+              <input class="event__offer-checkbox  visually-hidden" id="event-offer-comfort-${offer.id}" type="checkbox" name="event-offer-comfort" ${checked}>
+              <label class="event__offer-label" for="event-offer-comfort-${offer.id}">
                 <span class="event__offer-title">${offer.title}</span>
                 +€&nbsp;
                 <span class="event__offer-price">${offer.price}</span>
@@ -100,26 +96,32 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   </li>`;
 };
 
-export default class NewRoutePointEditFormView extends AbstractView {
-  #trip = null;
+export default class NewRoutePointEditFormView extends AbstractStatefulView {
   #destinations = null;
   #offers = null;
 
   constructor(trip, destinations, offers) {
     super();
-    this.#trip = trip;
+    this._state = NewRoutePointEditFormView.parseTripToState(trip);
     this.#destinations = destinations;
     this.#offers = offers;
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return createNewRoutePointEditFormTemplate(this.#trip, this.#destinations, this.#offers);
+    return createNewRoutePointEditFormTemplate(this._state, this.#destinations, this.#offers);
   }
 
   setClickHandler = (cb) => {
     this._callback.click = cb;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
+
+  static parseTripToState = (trip) => ({...trip
+  });
+
+  static parseStateToTrip = (state) => ({...state
+  });
 
   #clickHandler = (evt) => {
     evt.preventDefault();
@@ -133,6 +135,28 @@ export default class NewRoutePointEditFormView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit(this.#trip);
+    this._callback.formSubmit(NewRoutePointEditFormView.parseStateToTrip(this._state));
+  };
+
+  #changePoint = (evt) => {
+    this.updateElement({
+      destination: evt.target.value,
+    });
+  };
+
+  #changePointType = (evt) => {
+    this.updateElement({
+      type: evt.target.value,
+    });
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
   };
 }
