@@ -102,7 +102,7 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
 
   constructor(trip, destinations, offers) {
     super();
-    this._state = this.#parseTripToState(trip);
+    this._state = NewRoutePointEditFormView.parseTripToState(trip);
     this.#destinations = destinations;
     this.#offers = offers;
     this.#setInnerHandlers();
@@ -117,10 +117,10 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
 
-  #parseTripToState = (trip) => ({...trip
+  static parseTripToState = (trip) => ({...trip
   });
 
-  #paseStateToTrip = (state) => ({state
+  static parseStateToTrip = (state) => ({...state
   });
 
   #clickHandler = (evt) => {
@@ -135,7 +135,7 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit(this.#paseStateToTrip(this._state));
+    this._callback.formSubmit(NewRoutePointEditFormView.parseStateToTrip(this._state));
   };
 
   #changePoint = (evt) => {
