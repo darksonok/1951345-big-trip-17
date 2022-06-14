@@ -49,10 +49,19 @@ const updateItem = (items, update) => {
   ];
 };
 
+const sortTripsByDate = (tripA, tripB) => dayjs(tripA.dateFrom).diff(dayjs(tripB.dateFrom));
+
+const sortTripsByTime = (tripA, tripB) => dayjs(tripA.dateTo).diff(dayjs(tripA.dateFrom)) - dayjs(tripB.dateTo).diff(dayjs(tripB.dateFrom));
+
+const sortTripsByPrice = (tripA, tripB) =>  tripA.price - tripB.price;
+
 export {
   humanazieTripDate,
   dateDifference,
   getChosenFilter,
-  updateItem
+  updateItem,
+  sortTripsByDate,
+  sortTripsByTime,
+  sortTripsByPrice
 };
 
