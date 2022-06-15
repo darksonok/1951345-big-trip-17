@@ -10,7 +10,40 @@ const emptyListMessages = {
   FUTURE: 'There are no future events now',
   PAST: 'There are no past events now'
 };
+const SortType = [
+  {
+    NAME: 'day',
+    OPTION: 'checked'
+  },
+  {
+    NAME: 'event',
+    OPTION: 'disabled'
+  },
+  {
+    NAME: 'time',
+    OPTION: ''
+  },
+  {
+    NAME: 'price',
+    OPTION: ''
+  },
+  {
+    NAME: 'offers',
+    OPTION: 'disabled'
+  }
+];
+
+const SortNames = {
+  DAY: '0',
+  EVENT: '1',
+  TIME: '2',
+  PRICE: '3',
+  OFFERS: '4'
+};
+
 export {
+  SortNames,
+  SortType,
   NUMBER_OF_TRIP_POINTS,
   NUMBER_OF_TRIPS,
   humanazieOptions,

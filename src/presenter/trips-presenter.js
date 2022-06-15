@@ -6,6 +6,8 @@ import { getChosenFilter } from '../utils.js';
 import { emptyListMessages } from '../data.js';
 import TripPresenter from './trip-presenter.js';
 import { updateItem } from '../utils.js';
+import { SortType, SortNames } from '../data.js';
+import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';
 
 export default class TripsPresenter {
 
@@ -16,6 +18,8 @@ export default class TripsPresenter {
   #destinations = null;
   #offers = null;
   #tripPresenter = new Map();
+  #currentSortType = SortType[SortNames.DAY].NAME;
+  #sourcedBoardTrips = [];
 
   constructor(tripContainer, tripsModel) {
     this.#tripContainer = tripContainer;
@@ -25,10 +29,11 @@ export default class TripsPresenter {
   }
 
   init = () => {
+    this.#sourcedBoardTrips = [...this.#trips];
     this.#renderSorter();
     this.#renderTripComponent();
     this.#renderEmptyList(this.#trips);
-    this.#renderTrips(this.#trips, this.#destinations, this.#offers);
+    this.#renderTrips(this.#sourcedBoardTrips, this.#destinations, this.#offers);
   };
 
   #handleModeChange = () => {
@@ -47,6 +52,7 @@ export default class TripsPresenter {
 
   #renderSorter = () => {
     render(this.#sorterComponent, this.#tripContainer);
+    this.#sorterComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 
   #renderTripComponent = () => {
@@ -78,5 +84,31 @@ export default class TripsPresenter {
   #handleTripUpdate = (updatedTrip) => {
     this.#trips = updateItem(this.#trips, updatedTrip);
     this.#tripPresenter.get(updatedTrip.id).init(updatedTrip, this.#destinations, this.#offers);
+  };
+
+  #sortTasks = (sortType) => {
+    switch (sortType) {
+      case SortType[SortNames.DAY].NAME:
+        this.#sourcedBoardTrips.sort(sortTripsByDate);
+        break;
+      case SortType[SortNames.TIME].NAME:
+        this.#sourcedBoardTrips.sort(sortTripsByTime);
+        break;
+      case SortType[SortNames.PRICE].NAME:
+        this.#sourcedBoardTrips.sort(sortTripsByPrice);
+        break;
+    }
+
+    this.#currentSortType = sortType;
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortTasks(sortType);
+    this.#clearTripList();
+    this.#renderTrips(this.#sourcedBoardTrips, this.#destinations, this.#offers);
   };
 }
