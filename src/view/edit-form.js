@@ -1,5 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanazieTripDate } from '../utils.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
@@ -99,6 +101,8 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
 export default class NewRoutePointEditFormView extends AbstractStatefulView {
   #destinations = null;
   #offers = null;
+  #dateToPicker = null;
+  #dateFromPicker = null;
 
   constructor(trip, destinations, offers) {
     super();
@@ -106,7 +110,24 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     this.#destinations = destinations;
     this.#offers = offers;
     this.#setInnerHandlers();
+    this.#setDateTopicker();
+    this.#setDateFromPicker();
   }
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#dateToPicker) {
+      this.#dateToPicker.destroy();
+      this.#dateToPicker = null;
+    }
+
+    if (this.#dateFromPicker) {
+      this.#dateFromPicker.destroy();
+      this.#dateFromPicker = null;
+    }
+
+  };
 
   get template() {
     return createNewRoutePointEditFormTemplate(this._state, this.#destinations, this.#offers);
@@ -157,6 +178,45 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.#setDateTopicker();
+    this.#setDateFromPicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
   };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #setDateTopicker = () => {
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'j F H:i',
+        enableTime: true,
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  };
+
+  #setDateFromPicker = () => {
+    this.#dateFromPicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'j F H:i',
+        enableTime: true,
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
+  };
+
 }

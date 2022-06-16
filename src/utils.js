@@ -21,8 +21,8 @@ const dateDifference = (dateFrom, dateTo) => {
       return `${Math.floor(timeDifference/3600000)  }H ${Math.floor((timeDifference-Math.floor(timeDifference/3600000)*3600000)/60000)}M`;
     case (timeDifference > 86400000):
       return `${Math.floor(timeDifference/86400000)}D 
-              ${Math.floor(timeDifference - Math.floor(timeDifference/86400000)*86400000/3600000)  }H 
-              ${Math.floor((timeDifference-Math.floor(timeDifference/3600000)*3600000)/60000)}M`;
+              ${Math.floor((timeDifference - Math.floor(timeDifference/86400000)*86400000)/3600000)  }H 
+              ${Math.floor((timeDifference - Math.floor(timeDifference/3600000)*3600000)/60000)}M`;
   }
 };
 
