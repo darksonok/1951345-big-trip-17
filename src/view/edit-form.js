@@ -67,7 +67,7 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
           <span class="visually-hidden">Price</span>
           €
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${parseInt(trip.basePrice, 10) + parseInt(calculateOffersPrice(), 10)}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${trip.basePrice}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -168,6 +168,7 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    this.#checkPointOffers();
     this._callback.formSubmit(NewRoutePointEditFormView.parseStateToTrip(this._state));
   };
 
@@ -193,10 +194,26 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     });
   };
 
+  #changePointPrice = (evt) => {
+    this.updateElement({
+      basePrice: evt.target.value,
+    });
+  };
+
+  #checkPointOffers = () => {
+    const AllOffers = this.element.querySelectorAll('.event__offer-checkbox');
+    const offersArray = [];
+    AllOffers.forEach((offer) => offer.checked ? offersArray.push(parseInt(offer.id.split('-')[3], 10)): '');
+    this.updateElement({
+      offers: offersArray,
+    });
+  };
+
   #setInnerHandlers = () => {
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePointPrice);
   };
 
   _restoreHandlers = () => {
