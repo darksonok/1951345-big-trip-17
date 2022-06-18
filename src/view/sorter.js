@@ -1,17 +1,24 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { SortType } from '../data.js';
-const createNewSorterTemplate = () => (
+const createNewSorterTemplate = (currentSortType) => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
      ${SortType.map((sorter) => `<div class="trip-sort__item  trip-sort__item--${sorter.NAME}">
-     <input id="sort-${sorter.NAME}" class="trip-sort__input  visually-hidden" data-sort-type=${sorter.NAME} type="radio" name="trip-sort" value="sort-${sorter.NAME}" ${sorter.OPTION}>
+     <input id="sort-${sorter.NAME}" class="trip-sort__input  visually-hidden" data-sort-type=${sorter.NAME} type="radio" name="trip-sort" value="sort-${sorter.NAME}" ${sorter.OPTION} ${currentSortType === sorter.NAME ? 'checked' : ''}>
      <label class="trip-sort__btn" for="sort-${sorter.NAME}">${sorter.NAME}</label>
      </div>`).join('')}
    </form>`
 );
 
 export default class NewSorterView extends AbstractView {
+  #currentSorterType = null;
+
+  constructor(currentSortType) {
+    super();
+    this.#currentSorterType = currentSortType;
+  }
+
   get template() {
-    return createNewSorterTemplate();
+    return createNewSorterTemplate(this.#currentSorterType);
   }
 
   setSortTypeChangeHandler = (callback) => {
@@ -24,7 +31,6 @@ export default class NewSorterView extends AbstractView {
       return;
     }
 
-    evt.preventDefault();
     this._callback.sortTypeChange(evt.target.dataset.sortType);
   };
 }

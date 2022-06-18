@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { humanazieOptions } from './data.js';
+import { FilterType } from './data.js';
 
 const humanazieTripDate = (date, option) => {
   switch(true) {
@@ -35,18 +36,10 @@ const getChosenFilter = () => {
   }
 };
 
-const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0,index),
-    update,
-    ...items.slice(index+1),
-  ];
+const filter = {
+  [FilterType.EVERYTHING]: (trips) => trips.filter((trip) => (trip)),
+  [FilterType.FUTURE]: (trips) => trips.filter((trip) => dayjs(trip.dateFrom) > dayjs()),
+  [FilterType.PAST]: (trips) => trips.filter((trip) => dayjs(trip.dateFrom) < dayjs())
 };
 
 const sortTripsByDate = (tripA, tripB) => dayjs(tripA.dateFrom).diff(dayjs(tripB.dateFrom));
@@ -55,11 +48,14 @@ const sortTripsByTime = (tripA, tripB) => dayjs(tripA.dateTo).diff(dayjs(tripA.d
 
 const sortTripsByPrice = (tripA, tripB) =>  tripA.price - tripB.price;
 
+const isDateEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
+
 export {
+  filter,
+  isDateEqual,
   humanazieTripDate,
   dateDifference,
   getChosenFilter,
-  updateItem,
   sortTripsByDate,
   sortTripsByTime,
   sortTripsByPrice

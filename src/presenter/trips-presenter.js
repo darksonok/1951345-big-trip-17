@@ -1,56 +1,93 @@
 import NewSorterView from '../view/sorter.js';
-import { render } from '../framework/render.js';
+import { remove, render } from '../framework/render.js';
 import NewTripEventsView from '../view/trip-events-view.js';
 import NewEmptyListView from '../view/empty-list.js';
-import { getChosenFilter } from '../utils.js';
-import { emptyListMessages } from '../data.js';
 import TripPresenter from './trip-presenter.js';
-import { updateItem } from '../utils.js';
-import { SortType, SortNames } from '../data.js';
+import { SortType, SortNames, UpdateType, UserAction, FilterType } from '../data.js';
 import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';
+import { filter } from '../utils.js';
+import NewTripPresenter from './new-trip-presenter.js';
 
 export default class TripsPresenter {
 
   #tripContainer = null;
   #tripComponent = new NewTripEventsView();
-  #sorterComponent = new NewSorterView();
-  #trips = null;
-  #destinations = null;
-  #offers = null;
+  #emptyListComponent = null;
+  #sorterComponent = null;
+  #tripsModel = null;
+  #filterModel = null;
   #tripPresenter = new Map();
+  #newTripPresenter = null;
   #currentSortType = SortType[SortNames.DAY].NAME;
-  #sourcedBoardTrips = [];
+  #filterType = FilterType.EVERYTHING;
 
-  constructor(tripContainer, tripsModel) {
+  constructor(tripContainer, tripsModel, filterModel) {
     this.#tripContainer = tripContainer;
-    this.#trips = tripsModel.trips;
-    this.#destinations = tripsModel.destinations;
-    this.#offers = tripsModel.offers;
+    this.#tripsModel = tripsModel;
+    this.#filterModel = filterModel;
+
+    this.#newTripPresenter = new NewTripPresenter(this.#tripComponent.element, this.#handleViewAction, this.#tripsModel);
+
+    this.#tripsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
+  }
+
+  get trips() {
+    this.#filterType = this.#filterModel.filter;
+    const trips = this.#tripsModel.trips;
+    const filteredTrips = filter[this.#filterType](trips);
+
+    switch (this.#currentSortType) {
+      case SortType[SortNames.DAY].NAME:
+        return filteredTrips.sort(sortTripsByDate);
+      case SortType[SortNames.TIME].NAME:
+        return filteredTrips.sort(sortTripsByTime);
+      case SortType[SortNames.PRICE].NAME:
+        return filteredTrips.sort(sortTripsByPrice);
+    }
+    return filteredTrips;
+  }
+
+  get destinations() {
+    return this.#tripsModel.destinations;
+  }
+
+  get offers() {
+    return this.#tripsModel.offers;
   }
 
   init = () => {
-    this.#sourcedBoardTrips = [...this.#trips];
     this.#renderSorter();
     this.#renderTripComponent();
-    this.#renderEmptyList(this.#trips);
-    this.#renderTrips(this.#sourcedBoardTrips, this.#destinations, this.#offers);
+    this.#renderTrips();
+  };
+
+  createTripPoint = (cb) => {
+    this.#currentSortType = SortType.EVERYTHING;
+    this.#filterModel.setFilter(UpdateType.MINOR, FilterType.EVERYTHING);
+    this.#newTripPresenter.init(cb);
   };
 
   #handleModeChange = () => {
+    this.#newTripPresenter.destroy();
     this.#tripPresenter.forEach((presenter) => presenter.resetView());
   };
 
   #renderTrip = (trip, destinations, offers) => {
-    const tripPresenter = new TripPresenter(this.#tripComponent.element, this.#handleTripUpdate, this.#handleModeChange);
+    const tripPresenter = new TripPresenter(this.#tripComponent.element, this.#handleViewAction, this.#handleModeChange);
     tripPresenter.init(trip, destinations, offers);
     this.#tripPresenter.set(trip.id, tripPresenter);
   };
 
-  #renderTrips = (trips, destinations, offers) => {
-    trips.forEach((trip) => this.#renderTrip(trip, destinations, offers));
+  #renderTrips = () => {
+    this.trips.forEach((trip) => this.#renderTrip(trip, this.destinations, this.offers));
+    if(this.trips.length === 0){
+      this.#renderEmptyList();
+    }
   };
 
   #renderSorter = () => {
+    this.#sorterComponent = new NewSorterView(this.#currentSortType);
     render(this.#sorterComponent, this.#tripContainer);
     this.#sorterComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
@@ -59,47 +96,52 @@ export default class TripsPresenter {
     render(this.#tripComponent, this.#tripContainer);
   };
 
-  #renderEmptyList = (trips) => {
-    if(trips.length === 0){
-      switch(true){
-        case (getChosenFilter() === 'filter-everything'):
-          render(new NewEmptyListView(emptyListMessages.EVERYTHING), this.#tripContainer);
-          break;
-        case (getChosenFilter() === 'filter-future'):
-          render(new NewEmptyListView(emptyListMessages.FUTURE), this.#tripContainer);
-          break;
-        case (getChosenFilter() === 'filter-past'):
-          render(new NewEmptyListView(emptyListMessages.PAST), this.#tripContainer);
-          break;
-      }
-    }
-
+  #renderEmptyList = () => {
+    this.#emptyListComponent = new NewEmptyListView(this.#filterType);
+    render(this.#emptyListComponent, this.#tripContainer);
   };
 
-  #clearTripList = () => {
+  #clearTripList = ({resetSortType = false} = {}) => {
     this.#tripPresenter.forEach((presenter) => presenter.destroy());
+    this.#newTripPresenter.destroy();
     this.#tripPresenter.clear();
+
+    if (resetSortType) {
+      this.#currentSortType = SortType[SortNames.DAY].NAME;
+    }
+    if (this.#emptyListComponent) {
+      remove(this.#emptyListComponent);
+    }
   };
 
-  #handleTripUpdate = (updatedTrip) => {
-    this.#trips = updateItem(this.#trips, updatedTrip);
-    this.#tripPresenter.get(updatedTrip.id).init(updatedTrip, this.#destinations, this.#offers);
-  };
-
-  #sortTasks = (sortType) => {
-    switch (sortType) {
-      case SortType[SortNames.DAY].NAME:
-        this.#sourcedBoardTrips.sort(sortTripsByDate);
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_TRIP:
+        this.#tripsModel.updateTrip(updateType, update);
         break;
-      case SortType[SortNames.TIME].NAME:
-        this.#sourcedBoardTrips.sort(sortTripsByTime);
+      case UserAction.ADD_TRIP:
+        this.#tripsModel.addTrip(updateType, update);
         break;
-      case SortType[SortNames.PRICE].NAME:
-        this.#sourcedBoardTrips.sort(sortTripsByPrice);
+      case UserAction.DELETE_TRIP:
+        this.#tripsModel.deleteTrip(updateType, update);
         break;
     }
+  };
 
-    this.#currentSortType = sortType;
+  #handleModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#tripPresenter.get(data.id).init(data);
+        break;
+      case UpdateType.MINOR:
+        this.#clearTripList();
+        this.#renderTrips();
+        break;
+      case UpdateType.MAJOR:
+        this.#clearTripList({resetSortType: true});
+        this.#renderTrips();
+        break;
+    }
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -107,8 +149,8 @@ export default class TripsPresenter {
       return;
     }
 
-    this.#sortTasks(sortType);
+    this.#currentSortType = sortType;
     this.#clearTripList();
-    this.#renderTrips(this.#sourcedBoardTrips, this.#destinations, this.#offers);
+    this.#renderTrips();
   };
 }

@@ -1,15 +1,16 @@
 import dayjs from 'dayjs';
+import { FilterType } from '../data.js';
 
 export const gerenateFilters = (trips) => ([{
-  name: 'EVERYTHING',
+  name: FilterType.EVERYTHING,
   count: trips.length
 },
 {
-  name: 'FUTURE',
+  name: FilterType.FUTURE,
   count: trips.filter((trip) => dayjs(trip.dateFrom) > dayjs()).length
 },
 {
-  name: 'PAST',
+  name: FilterType.PAST,
   count: trips.filter((trip) => dayjs(trip.dateFrom) < dayjs()).length
 }
 ]);
