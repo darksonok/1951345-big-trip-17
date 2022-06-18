@@ -1,6 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanazieTripDate } from '../utils.js';
+import flatpickr from 'flatpickr';
 import he from 'he';
+
+import 'flatpickr/dist/flatpickr.min.css';
+
 
 const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
