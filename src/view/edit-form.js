@@ -1,9 +1,20 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanazieTripDate } from '../utils.js';
+import he from 'he';
 
 const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
   const destinationInfo = destinations.find((destination) => destination.name === trip.destination);
+  const isOffersChecked = pointTypeOffer.offers
+    .filter((offer) => trip.offers
+      .includes(offer.id))
+    .map((offer) => offer.price).length !== 0;
+
+  const calculateOffersPrice = () => isOffersChecked ? pointTypeOffer.offers
+    .filter((offer) => trip.offers
+      .includes(offer.id))
+    .map((offer) => offer.price)
+    .reduce((val1, val2) => val1 + val2): 0;
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -34,8 +45,8 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${trip.type}
         </label>
-        <select class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${trip.destination}" >
-        ${destinations.map((destination) => `<option ${destination.name === destinationInfo.name ? 'selected' : ''} value="${destination.name}">${destination.name}</option>`).join('')}
+        <select class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(trip.destination)}" >
+        ${destinations.map((destination) => `<option ${destination.name === destinationInfo.name ? 'selected' : ''} value="${he.encode(destination.name)}">${he.encode(destination.name)}</option>`).join('')}
         </select>
       </div>
 
@@ -52,7 +63,7 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
           <span class="visually-hidden">Price</span>
           €
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${trip.basePrice + pointTypeOffer.offers.filter((offer) => trip.offers.includes(offer.id)).map((offer) => offer.price).reduce((val1, val2) => val1 + val2)}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${parseInt(trip.basePrice, 10) + parseInt(calculateOffersPrice(), 10)}">
       </div>
 
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -91,7 +102,6 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
                     </div>
                   </section>
                 </section>
-    </section>
   </form>
   </li>`;
 };
@@ -138,6 +148,16 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     this._callback.formSubmit(NewRoutePointEditFormView.parseStateToTrip(this._state));
   };
 
+  setDeleteClickHandler = (cb) => {
+    this._callback.deleteClick = cb;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(NewRoutePointEditFormView.parseStateToTrip(this._state));
+  };
+
   #changePoint = (evt) => {
     this.updateElement({
       destination: evt.target.value,
@@ -153,10 +173,21 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
   #setInnerHandlers = () => {
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
   };
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
+  };
+
+  #checkPrice = (evt) => {
+    const submitButton = this.element.querySelector('.event__save-btn');
+    if(!/[0-9]/.test(evt.target.value)) {
+      submitButton.disabled = true;
+    } else {
+      submitButton.disabled = false;
+    }
   };
 }

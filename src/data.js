@@ -5,6 +5,13 @@ const humanazieOptions = {
   FOR_TRIP_POINT_DATE: 'tripPointDate',
   FOR_TRIP_POINT_TIME: 'tripPointTime'
 };
+
+const FilterType = {
+  EVERYTHING: 'everyting',
+  PAST: 'past',
+  FUTURE: 'future'
+};
+
 const emptyListMessages = {
   EVERYTHING:'Click New Event to create your first point',
   FUTURE: 'There are no future events now',
@@ -13,7 +20,7 @@ const emptyListMessages = {
 const SortType = [
   {
     NAME: 'day',
-    OPTION: 'checked'
+    OPTION: ''
   },
   {
     NAME: 'event',
@@ -41,11 +48,26 @@ const SortNames = {
   OFFERS: '4'
 };
 
+const UserAction = {
+  UPDATE_TRIP: 'UPDATE_TRIP',
+  ADD_TRIP: 'ADD_TRIP',
+  DELETE_TRIP: 'DELETE_TRIP',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
 export {
+  UserAction,
+  UpdateType,
   SortNames,
   SortType,
   NUMBER_OF_TRIP_POINTS,
   NUMBER_OF_TRIPS,
   humanazieOptions,
-  emptyListMessages
+  emptyListMessages,
+  FilterType
 };

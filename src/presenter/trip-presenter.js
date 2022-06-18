@@ -1,6 +1,8 @@
 import { render, replace, remove } from '../framework/render.js';
 import NewRoutePointEditFormView from '../view/edit-form.js';
 import NewRoutePointView from '../view/route-point.js';
+import { UserAction, UpdateType } from '../data.js';
+import { isDateEqual } from '../utils.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -32,6 +34,8 @@ export default class TripPresenter {
     this.#tripEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#tripEditComponent.setClickHandler(this.#closeTripEditForm);
     this.#tripComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+    this.#tripEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
+
     if (prevTripComponent === null || prevTripEditComponent === null) {
       render(this.#tripComponent, this.#tripContainer);
       return;
@@ -85,12 +89,27 @@ export default class TripPresenter {
     this.#openTripEditForm();
   };
 
-  #handleFormSubmit = (trip) => {
-    this.#changeData(trip);
+  #handleFormSubmit = (update) => {
+    this.#changeData(
+      UserAction.UPDATE_TRIP,
+      UpdateType.MINOR,
+      update);
+
     this.#closeTripEditForm();
   };
 
+  #handleDeleteClick = (trip) => {
+    this.#changeData(
+      UserAction.DELETE_TRIP,
+      UpdateType.MINOR,
+      trip
+    );
+  };
+
   #handleFavoriteClick = () => {
-    this.#changeData({...this.#trip, isFavorite: !this.#trip.isFavorite});
+    this.#changeData(
+      UserAction.UPDATE_TRIP,
+      UpdateType.MINOR,
+      {...this.#trip, isFavorite: !this.#trip.isFavorite});
   };
 }
