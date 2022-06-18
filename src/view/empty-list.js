@@ -12,7 +12,7 @@ const createEmptyListTemplate = (filter) => {
         return emptyListMessages.PAST;
     }
   };
-  return `<p class="trip-events__msg">${getMessage(filter)}</p>`};
+  return `<p class="trip-events__msg">${getMessage(filter)}</p>`;};
 
 export default class NewEmptyListView extends AbstractView{
   #filterType = null;

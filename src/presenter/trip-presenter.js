@@ -2,7 +2,6 @@ import { render, replace, remove } from '../framework/render.js';
 import NewRoutePointEditFormView from '../view/edit-form.js';
 import NewRoutePointView from '../view/route-point.js';
 import { UserAction, UpdateType } from '../data.js';
-import { isDateEqual } from '../utils.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
