@@ -28,7 +28,6 @@ export default class TripsPresenter {
     this.#tripContainer = tripContainer;
     this.#tripsModel = tripsModel;
     this.#filterModel = filterModel;
-    console.log(this.#tripsModel);
     this.#tripsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }

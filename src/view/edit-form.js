@@ -9,16 +9,7 @@ import 'flatpickr/dist/flatpickr.min.css';
 const createNewRoutePointEditFormTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
   const destinationInfo = destinations.find((destination) => destination.name === trip.destination);
-  const isOffersChecked = pointTypeOffer.offers
-    .filter((offer) => trip.offers
-      .includes(offer.id))
-    .map((offer) => offer.price).length !== 0;
 
-  const calculateOffersPrice = () => isOffersChecked ? pointTypeOffer.offers
-    .filter((offer) => trip.offers
-      .includes(offer.id))
-    .map((offer) => offer.price)
-    .reduce((val1, val2) => val1 + val2): 0;
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
