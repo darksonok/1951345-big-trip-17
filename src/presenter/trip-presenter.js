@@ -24,6 +24,7 @@ export default class TripPresenter {
 
   init = (trip, destinations, offers) => {
     this.#trip = trip;
+    this.#trip.totalPrice = this.getTotalPrice(trip, offers);
     const prevTripComponent = this.#tripComponent;
     const prevTripEditComponent = this.#tripEditComponent;
     this.#tripComponent = new NewRoutePointView(trip, destinations, offers);
@@ -111,4 +112,50 @@ export default class TripPresenter {
       UpdateType.MINOR,
       {...this.#trip, isFavorite: !this.#trip.isFavorite});
   };
+
+  setSaving = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#tripEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  };
+
+  setDeleting = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#tripEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  };
+
+  setAborting = () => {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#tripComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#tripEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#tripEditComponent.shake(resetFormState);
+  };
+
+  getTotalPrice = (trip, offers) => parseInt(trip.basePrice, 10) +
+    parseInt((offers.find((offer) => offer.type === trip.type).offers)
+      .filter((offer) => trip.offers.includes(offer.id))
+      .map((offer) => offer.price).length !== 0
+      ?
+      (offers.find((offer) => offer.type === trip.type).offers)
+        .filter((offer) => trip.offers.includes(offer.id))
+        .map((offer) => offer.price).reduce((val1, val2) => val1 + val2)
+      : 0,
+    10);
 }

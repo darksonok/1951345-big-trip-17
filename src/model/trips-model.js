@@ -62,32 +62,38 @@ export default class TripsModel extends Observasble {
       ];
       this._notify(updateType, updatedTrip);
     } catch(err) {
-      throw new Error('Can\'t update task');
+      throw new Error('Can\'t update trip');
     }
   };
 
-  addTrip = (updateType, update) => {
-    this.#trips = [
-      update,
-      ...this.#trips,
-    ];
-
-    this._notify(updateType, update);
+  addTrip = async (updateType, update) => {
+    try {
+      const response = await this.#tripsApiService.addTrip(update, this.#destinations);
+      const newTrip = this.#adaptToClient(response);
+      this.#trips = [newTrip, ...this.#trips];
+      this._notify(updateType, newTrip);
+    } catch(err) {
+      throw new Error('Can\'t add trip');
+    }
   };
 
-  deleteTrip = (updateType, update) => {
+  deleteTrip = async (updateType, update) => {
     const index = this.#trips.findIndex((trip) => trip.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting trip');
     }
 
-    this.#trips = [
-      ...this.#trips.slice(0, index),
-      ...this.#trips.slice(index + 1),
-    ];
-
-    this._notify(updateType);
+    try {
+      await this.#tripsApiService.deleteTrip(update);
+      this.#trips = [
+        ...this.#trips.slice(0, index),
+        ...this.#trips.slice(index + 1),
+      ];
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete trip');
+    }
   };
 
   #adaptToClient = (trip) => {
