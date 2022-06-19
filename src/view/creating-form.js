@@ -1,19 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import flatpickr from 'flatpickr';
 import he from 'he';
 
 const createNewRoutePointCreatorTemplate = (blankTrip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === blankTrip.type);
   const destinationInfo = destinations.find((destination) => destination.name === blankTrip.destination);
-  const isOffersChecked = pointTypeOffer.offers
-    .filter((offer) => blankTrip.offers
-      .includes(offer.id))
-    .map((offer) => offer.price).length !== 0;
-
-  const calculateOffersPrice = () => isOffersChecked ? pointTypeOffer.offers
-    .filter((offer) => blankTrip.offers
-      .includes(offer.id))
-    .map((offer) => offer.price)
-    .reduce((val1, val2) => val1 + val2): 0;
 
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -60,7 +51,7 @@ const createNewRoutePointCreatorTemplate = (blankTrip, destinations, offers) => 
           <span class="visually-hidden">Price</span>
           €
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${parseInt(blankTrip.basePrice, 10) + parseInt(calculateOffersPrice(), 10)}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${blankTrip.basePrice}">
       </div>
   
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -71,25 +62,25 @@ const createNewRoutePointCreatorTemplate = (blankTrip, destinations, offers) => 
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
   
         <div class="event__available-offers">
-          ${pointTypeOffer.offers.map((offer) => `<div class="event__offer-selector">
+          ${offers.length !== 0 ? pointTypeOffer.offers.map((offer) => `<div class="event__offer-selector">
                       <input class="event__offer-checkbox  visually-hidden" id="event-offer-comfort-${offer.id}" type="checkbox" name="event-offer-comfort">
                       <label class="event__offer-label" for="event-offer-comfort-${offer.id}">
                         <span class="event__offer-title">${offer.title}</span>
                         +€&nbsp;
                         <span class="event__offer-price">${offer.price}</span>
                        </label>
-                    </div>`).join('')}
+                    </div>`).join('') : ''}
         </div>
       </section>
   
       <section class="event__details">
                   <section class="event__section  event__section--destination">
                     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                    <p class="event__destination-description">${destinationInfo.description}</p>
+                    <p class="event__destination-description">${destinations.length !== 0 ? destinationInfo.description : ''}</p>
 
                     <div class="event__photos-container">
                       <div class="event__photos-tape">
-                        ${destinationInfo.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+                        ${destinations.length !==0 ? destinationInfo.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join(''): ''}
                       </div>
                     </div>
                   </section>
@@ -102,6 +93,8 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
 
   #destinations = null;
   #offers = null;
+  #dateToPicker = null;
+  #dateFromPicker = null;
 
   blankTrip = {
     basePrice: '1100',
@@ -120,7 +113,24 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     this.#destinations = destinations;
     this.#offers = offers;
     this.#setInnerHandlers();
+    this.#setDateTopicker();
+    this.#setDateFromPicker();
   }
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#dateToPicker) {
+      this.#dateToPicker.destroy();
+      this.#dateToPicker = null;
+    }
+
+    if (this.#dateFromPicker) {
+      this.#dateFromPicker.destroy();
+      this.#dateFromPicker = null;
+    }
+
+  };
 
   get template() {
     return createNewRoutePointCreatorTemplate(this._state, this.#destinations, this.#offers);
@@ -149,6 +159,7 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    this.#checkPointOffers();
     this._callback.formSubmit(NewRoutePointCreatorView.parseStateToTrip(this._state));
   };
 
@@ -174,14 +185,32 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     });
   };
 
+  #changePointPrice = (evt) => {
+    this.updateElement({
+      basePrice: evt.target.value,
+    });
+  };
+
+  #checkPointOffers = () => {
+    const AllOffers = this.element.querySelectorAll('.event__offer-checkbox');
+    const offersArray = [];
+    AllOffers.forEach((offer) => offer.checked ? offersArray.push(parseInt(offer.id.split('-')[3], 10)): '');
+    this.updateElement({
+      offers: offersArray,
+    });
+  };
+
   #setInnerHandlers = () => {
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePointPrice);
   };
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.#setDateTopicker();
+    this.#setDateFromPicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setDeleteClickHandler(this._callback.deleteClick);
   };
@@ -193,5 +222,41 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     } else {
       submitButton.disabled = false;
     }
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #setDateTopicker = () => {
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'j F H:i',
+        enableTime: true,
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  };
+
+  #setDateFromPicker = () => {
+    this.#dateFromPicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'j F H:i',
+        enableTime: true,
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
   };
 }

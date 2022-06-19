@@ -7,12 +7,14 @@ import { SortType, SortNames, UpdateType, UserAction, FilterType } from '../data
 import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';
 import { filter } from '../utils.js';
 import NewTripPresenter from './new-trip-presenter.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class TripsPresenter {
 
   #tripContainer = null;
   #tripComponent = new NewTripEventsView();
   #emptyListComponent = null;
+  #loadingComponent = new LoadingView();
   #sorterComponent = null;
   #tripsModel = null;
   #filterModel = null;
@@ -20,14 +22,12 @@ export default class TripsPresenter {
   #newTripPresenter = null;
   #currentSortType = SortType[SortNames.DAY].NAME;
   #filterType = FilterType.EVERYTHING;
+  #isLoading = true;
 
   constructor(tripContainer, tripsModel, filterModel) {
     this.#tripContainer = tripContainer;
     this.#tripsModel = tripsModel;
     this.#filterModel = filterModel;
-
-    this.#newTripPresenter = new NewTripPresenter(this.#tripComponent.element, this.#handleViewAction, this.#tripsModel);
-
     this.#tripsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
@@ -80,6 +80,10 @@ export default class TripsPresenter {
   };
 
   #renderTrips = () => {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
     this.trips.forEach((trip) => this.#renderTrip(trip, this.destinations, this.offers));
     if(this.trips.length === 0){
       this.#renderEmptyList();
@@ -141,6 +145,12 @@ export default class TripsPresenter {
         this.#clearTripList({resetSortType: true});
         this.#renderTrips();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderTrips();
+        this.#newTripPresenter = new NewTripPresenter(this.#tripComponent.element, this.#handleViewAction, this.#tripsModel);
+        break;
     }
   };
 
@@ -152,5 +162,9 @@ export default class TripsPresenter {
     this.#currentSortType = sortType;
     this.#clearTripList();
     this.#renderTrips();
+  };
+
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#tripComponent.element);
   };
 }
