@@ -117,8 +117,6 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     this.#setDateFromPicker();
   }
 
-
-
   get template() {
     return createNewRoutePointCreatorTemplate(this._state, this.#destinations, this.#offers);
   }

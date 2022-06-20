@@ -117,8 +117,6 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     this.#setDateFromPicker();
   }
 
-
-
   get template() {
     return createNewRoutePointEditFormTemplate(this._state, this.#destinations, this.#offers);
   }
