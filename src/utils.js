@@ -13,7 +13,7 @@ const humanazieTripDate = (date, option) => {
   }
 };
 
-const dateDifference = (dateFrom, dateTo) => {
+const calculateDateDifference = (dateFrom, dateTo) => {
   const timeDifference = dayjs(dateTo).diff(dayjs(dateFrom));
   switch(true) {
     case (timeDifference < 3600000) :
@@ -46,7 +46,7 @@ const sortTripsByDate = (tripA, tripB) => dayjs(tripA.dateFrom).diff(dayjs(tripB
 
 const sortTripsByTime = (tripA, tripB) => dayjs(tripA.dateTo).diff(dayjs(tripA.dateFrom)) - dayjs(tripB.dateTo).diff(dayjs(tripB.dateFrom));
 
-const sortTripsByPrice = (tripA, tripB) =>  tripA.basePrice - tripB.basePrice;
+const sortTripsByPrice = (tripA, tripB) =>  tripA.totalPrice - tripB.totalPrice;
 
 const isDateEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
 
@@ -54,7 +54,7 @@ export {
   filter,
   isDateEqual,
   humanazieTripDate,
-  dateDifference,
+  calculateDateDifference,
   getChosenFilter,
   sortTripsByDate,
   sortTripsByTime,

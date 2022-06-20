@@ -12,7 +12,7 @@ const FilterType = {
   FUTURE: 'future'
 };
 
-const emptyListMessages = {
+const EmptyListMessages = {
   EVERYTHING:'Click New Event to create your first point',
   FUTURE: 'There are no future events now',
   PAST: 'There are no past events now'
@@ -69,6 +69,6 @@ export {
   NUMBER_OF_TRIP_POINTS,
   NUMBER_OF_TRIPS,
   humanazieOptions,
-  emptyListMessages,
+  EmptyListMessages,
   FilterType
 };

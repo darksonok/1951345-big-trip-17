@@ -1,13 +1,19 @@
-import NewSorterView from '../view/sorter.js';
-import { remove, render } from '../framework/render.js';
-import NewTripEventsView from '../view/trip-events-view.js';
-import NewEmptyListView from '../view/empty-list.js';
+import NewSorterView from '../view/new-sorter-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import { remove, render, RenderPosition } from '../framework/render.js';
+import NewTripEventsView from '../view/new-trip-events-view.js';
+import NewEmptyListView from '../view/new-empty-list-view.js';
 import TripPresenter from './trip-presenter.js';
 import { SortType, SortNames, UpdateType, UserAction, FilterType } from '../data.js';
 import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';
 import { filter } from '../utils.js';
 import NewTripPresenter from './new-trip-presenter.js';
 import LoadingView from '../view/loading-view.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000
+};
 
 export default class TripsPresenter {
 
@@ -23,6 +29,7 @@ export default class TripsPresenter {
   #currentSortType = SortType[SortNames.DAY].NAME;
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
+  #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
 
   constructor(tripContainer, tripsModel, filterModel) {
     this.#tripContainer = tripContainer;
@@ -63,7 +70,8 @@ export default class TripsPresenter {
   };
 
   createTripPoint = (cb) => {
-    this.#currentSortType = SortType.EVERYTHING;
+    this.#currentSortType = SortType[SortNames.DAY].NAME;
+    this.#reRenderSorter();
     this.#filterModel.setFilter(UpdateType.MINOR, FilterType.EVERYTHING);
     this.#newTripPresenter.init(cb);
   };
@@ -118,18 +126,37 @@ export default class TripsPresenter {
     }
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_TRIP:
-        this.#tripsModel.updateTrip(updateType, update);
+        this.#tripPresenter.get(update.id).setSaving();
+        try {
+          await this.#tripsModel.updateTrip(updateType, update);
+        } catch(err) {
+          this.#tripPresenter.get(update.id).setAborting();
+        }
         break;
       case UserAction.ADD_TRIP:
-        this.#tripsModel.addTrip(updateType, update);
+        this.#newTripPresenter.setSaving();
+        try {
+          await this.#tripsModel.addTrip(updateType, update);
+        } catch(err) {
+          this.#newTripPresenter.setAborting();
+        }
         break;
       case UserAction.DELETE_TRIP:
-        this.#tripsModel.deleteTrip(updateType, update);
+        this.#tripPresenter.get(update.id).setDeleting();
+        try {
+          await this.#tripsModel.deleteTrip(updateType, update);
+        } catch(err) {
+          this.#tripPresenter.get(update.id).setAborting();
+        }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -166,5 +193,12 @@ export default class TripsPresenter {
 
   #renderLoading = () => {
     render(this.#loadingComponent, this.#tripComponent.element);
+  };
+
+  #reRenderSorter = () => {
+    remove(this.#sorterComponent);
+    this.#sorterComponent = new NewSorterView(this.#currentSortType);
+    render(this.#sorterComponent, this.#tripContainer, RenderPosition.AFTERBEGIN);
+    this.#sorterComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 }

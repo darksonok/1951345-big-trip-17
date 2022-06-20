@@ -1,18 +1,10 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanazieTripDate, dateDifference } from '../utils.js';
+import { humanazieTripDate, calculateDateDifference } from '../utils.js';
 import he from 'he';
 
 const createNewRoutePointTemplate = (trip, destinations, offers) => {
   const pointTypeOffer = offers.find((offer) => offer.type === trip.type);
   const favorite = trip.isFavorite? 'event__favorite-btn--active' : '';
-  const isOffersChecked = pointTypeOffer.offers
-    .filter((offer) => trip.offers.includes(offer.id))
-    .map((offer) => offer.price).length !== 0;
-  const getOffersPrice = () => isOffersChecked ?
-    pointTypeOffer.offers
-      .filter((offer) => trip.offers.includes(offer.id))
-      .map((offer) => offer.price)
-      .reduce((val1, val2) => val1 + val2) : 0;
 
   return `<li class="trip-events__item">
     <div class="event">
@@ -27,10 +19,10 @@ const createNewRoutePointTemplate = (trip, destinations, offers) => {
           —
           <time class="event__end-time" datetime="${trip.dateTo}">${humanazieTripDate(trip.dateTo, 'tripPointTime')}</time>
         </p>
-        <p class="event__duration">${dateDifference(trip.dateFrom, trip.dateTo)}</p>
+        <p class="event__duration">${calculateDateDifference(trip.dateFrom, trip.dateTo)}</p>
       </div>
       <p class="event__price">
-        €&nbsp;<span class="event__price-value">${parseInt(trip.basePrice, 10) + parseInt(getOffersPrice(), 10)}</span>
+        €&nbsp;<span class="event__price-value">${trip.totalPrice}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
@@ -73,14 +65,14 @@ export default class NewRoutePointView extends AbstractView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
 
-  #clickHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.click();
-  };
-
   setFavoriteClickHandler = (cb) => {
     this._callback.favoriteClick = cb;
     this.element.querySelector('.event__favorite-icon').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
   };
 
   #favoriteClickHandler = (evt) => {
