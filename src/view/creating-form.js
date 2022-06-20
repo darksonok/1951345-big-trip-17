@@ -98,8 +98,8 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
 
   blankTrip = {
     basePrice: '1100',
-    dateFrom: '',
-    dateTo: '',
+    dateFrom: new Date(),
+    dateTo: new Date(),
     destination: 'Chamonix',
     isFavorite: false,
     id: '',

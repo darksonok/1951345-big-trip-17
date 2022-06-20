@@ -1,6 +1,6 @@
 import NewSorterView from '../view/sorter.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
-import { remove, render } from '../framework/render.js';
+import { remove, render, RenderPosition } from '../framework/render.js';
 import NewTripEventsView from '../view/trip-events-view.js';
 import NewEmptyListView from '../view/empty-list.js';
 import TripPresenter from './trip-presenter.js';
@@ -70,7 +70,8 @@ export default class TripsPresenter {
   };
 
   createTripPoint = (cb) => {
-    this.#currentSortType = SortType.EVERYTHING;
+    this.#currentSortType = SortType[SortNames.DAY].NAME;
+    this.#reRenderSorter();
     this.#filterModel.setFilter(UpdateType.MINOR, FilterType.EVERYTHING);
     this.#newTripPresenter.init(cb);
   };
@@ -192,5 +193,12 @@ export default class TripsPresenter {
 
   #renderLoading = () => {
     render(this.#loadingComponent, this.#tripComponent.element);
+  };
+
+  #reRenderSorter = () => {
+    remove(this.#sorterComponent);
+    this.#sorterComponent = new NewSorterView(this.#currentSortType);
+    render(this.#sorterComponent, this.#tripContainer, RenderPosition.AFTERBEGIN);
+    this.#sorterComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 }
