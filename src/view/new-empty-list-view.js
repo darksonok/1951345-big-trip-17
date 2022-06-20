@@ -1,15 +1,15 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { emptyListMessages, FilterType } from '../data.js';
+import { EmptyListMessages, FilterType } from '../data.js';
 
 const createEmptyListTemplate = (filter) => {
   const getMessage = (filterType) => {
     switch(true){
       case (filterType === FilterType.EVERYTHING):
-        return emptyListMessages.EVERYTHING;
+        return EmptyListMessages.EVERYTHING;
       case (filterType === FilterType.FUTURE):
-        return emptyListMessages.FUTURE;
+        return EmptyListMessages.FUTURE;
       case (filterType === FilterType.PAST):
-        return emptyListMessages.PAST;
+        return EmptyListMessages.PAST;
     }
   };
   return `<p class="trip-events__msg">${getMessage(filter)}</p>`;};

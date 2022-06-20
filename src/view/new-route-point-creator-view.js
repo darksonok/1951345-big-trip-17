@@ -117,6 +117,18 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     this.#setDateFromPicker();
   }
 
+
+
+  get template() {
+    return createNewRoutePointCreatorTemplate(this._state, this.#destinations, this.#offers);
+  }
+
+  setClickHandler = (cb) => {
+    this._callback.click = cb;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  };
+
+
   removeElement = () => {
     super.removeElement();
 
@@ -132,28 +144,45 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
 
   };
 
-  get template() {
-    return createNewRoutePointCreatorTemplate(this._state, this.#destinations, this.#offers);
-  }
-
-  setClickHandler = (cb) => {
-    this._callback.click = cb;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+  setFormSubmitHandler = (cb) => {
+    this._callback.formSubmit = cb;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
   };
 
-  static parseTripToState = (trip) => ({...trip,
-    isDisabled: false,
-    isDeleting: false,
-    isSaving: false
-  });
+  setDeleteClickHandler = (cb) => {
+    this._callback.deleteClick = cb;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
 
-  static parseStateToTrip = (state) => {
-    const trip = {...state};
-    delete trip.isDeleting;
-    delete trip.isDisabled;
-    delete trip.isSaving;
+  #setInnerHandlers = () => {
+    this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePointPrice);
+  };
 
-    return trip;
+  #setDateTopicker = () => {
+    this.#dateToPicker = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'j F H:i',
+        enableTime: true,
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+      },
+    );
+  };
+
+  #setDateFromPicker = () => {
+    this.#dateFromPicker = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'j F H:i',
+        enableTime: true,
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+      },
+    );
   };
 
   #clickHandler = (evt) => {
@@ -161,20 +190,10 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     this._callback.click();
   };
 
-  setFormSubmitHandler = (cb) => {
-    this._callback.formSubmit = cb;
-    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-  };
-
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#checkPointOffers();
     this._callback.formSubmit(NewRoutePointCreatorView.parseStateToTrip(this._state));
-  };
-
-  setDeleteClickHandler = (cb) => {
-    this._callback.deleteClick = cb;
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
   };
 
   #formDeleteClickHandler = (evt) => {
@@ -209,13 +228,6 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     });
   };
 
-  #setInnerHandlers = () => {
-    this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePointPrice);
-  };
-
   _restoreHandlers = () => {
     this.#setInnerHandlers();
     this.#setDateTopicker();
@@ -245,27 +257,18 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     });
   };
 
-  #setDateTopicker = () => {
-    this.#dateToPicker = flatpickr(
-      this.element.querySelector('#event-end-time-1'),
-      {
-        dateFormat: 'j F H:i',
-        enableTime: true,
-        defaultDate: this._state.dateTo,
-        onChange: this.#dateToChangeHandler,
-      },
-    );
-  };
+  static parseTripToState = (trip) => ({...trip,
+    isDisabled: false,
+    isDeleting: false,
+    isSaving: false
+  });
 
-  #setDateFromPicker = () => {
-    this.#dateFromPicker = flatpickr(
-      this.element.querySelector('#event-start-time-1'),
-      {
-        dateFormat: 'j F H:i',
-        enableTime: true,
-        defaultDate: this._state.dateFrom,
-        onChange: this.#dateFromChangeHandler,
-      },
-    );
+  static parseStateToTrip = (state) => {
+    const trip = {...state};
+    delete trip.isDeleting;
+    delete trip.isDisabled;
+    delete trip.isSaving;
+
+    return trip;
   };
 }

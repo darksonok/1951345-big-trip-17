@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanazieTripDate, dateDifference } from '../utils.js';
+import { humanazieTripDate, calculateDateDifference } from '../utils.js';
 import he from 'he';
 
 const createNewRoutePointTemplate = (trip, destinations, offers) => {
@@ -19,7 +19,7 @@ const createNewRoutePointTemplate = (trip, destinations, offers) => {
           —
           <time class="event__end-time" datetime="${trip.dateTo}">${humanazieTripDate(trip.dateTo, 'tripPointTime')}</time>
         </p>
-        <p class="event__duration">${dateDifference(trip.dateFrom, trip.dateTo)}</p>
+        <p class="event__duration">${calculateDateDifference(trip.dateFrom, trip.dateTo)}</p>
       </div>
       <p class="event__price">
         €&nbsp;<span class="event__price-value">${trip.totalPrice}</span>
@@ -65,14 +65,14 @@ export default class NewRoutePointView extends AbstractView {
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   };
 
-  #clickHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.click();
-  };
-
   setFavoriteClickHandler = (cb) => {
     this._callback.favoriteClick = cb;
     this.element.querySelector('.event__favorite-icon').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
   };
 
   #favoriteClickHandler = (evt) => {

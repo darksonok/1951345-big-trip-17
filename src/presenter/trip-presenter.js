@@ -1,6 +1,6 @@
 import { render, replace, remove } from '../framework/render.js';
-import NewRoutePointEditFormView from '../view/edit-form.js';
-import NewRoutePointView from '../view/route-point.js';
+import NewRoutePointEditFormView from '../view/new-route-point-edit-form-view.js';
+import NewRoutePointView from '../view/new-route-point-view.js';
 import { UserAction, UpdateType } from '../data.js';
 
 const Mode = {
@@ -24,7 +24,7 @@ export default class TripPresenter {
 
   init = (trip, destinations, offers) => {
     this.#trip = trip;
-    this.#trip.totalPrice = this.getTotalPrice(trip, offers);
+    this.#trip.totalPrice = this.calculateTotalPrice(trip, offers);
     const prevTripComponent = this.#tripComponent;
     const prevTripEditComponent = this.#tripEditComponent;
     this.#tripComponent = new NewRoutePointView(trip, destinations, offers);
@@ -52,6 +52,32 @@ export default class TripPresenter {
     remove(prevTripComponent);
     remove(prevTripEditComponent);
 
+  };
+
+  setDeleting = () => {
+    if (this.#mode === Mode.EDITING) {
+      this.#tripEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  };
+
+  setAborting = () => {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#tripComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#tripEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#tripEditComponent.shake(resetFormState);
   };
 
   resetView = () => {
@@ -122,33 +148,7 @@ export default class TripPresenter {
     }
   };
 
-  setDeleting = () => {
-    if (this.#mode === Mode.EDITING) {
-      this.#tripEditComponent.updateElement({
-        isDisabled: true,
-        isDeleting: true,
-      });
-    }
-  };
-
-  setAborting = () => {
-    if (this.#mode === Mode.DEFAULT) {
-      this.#tripComponent.shake();
-      return;
-    }
-
-    const resetFormState = () => {
-      this.#tripEditComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
-    };
-
-    this.#tripEditComponent.shake(resetFormState);
-  };
-
-  getTotalPrice = (trip, offers) => parseInt(trip.basePrice, 10) +
+  calculateTotalPrice = (trip, offers) => parseInt(trip.basePrice, 10) +
     parseInt(trip.offers.length !== 0
       ?
       (offers.find((offer) => offer.type === trip.type).offers)

@@ -18,12 +18,10 @@ export default class TripsModel extends Observasble {
     return this.#trips;
   }
 
-  // eslint-disable-next-line no-dupe-class-members
   get destinations() {
     return this.#destinations;
   }
 
-  // eslint-disable-next-line no-dupe-class-members
   get offers() {
     return this.#offers;
   }

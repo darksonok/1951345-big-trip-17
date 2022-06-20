@@ -1,8 +1,8 @@
-import NewSorterView from '../view/sorter.js';
+import NewSorterView from '../view/new-sorter-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { remove, render, RenderPosition } from '../framework/render.js';
-import NewTripEventsView from '../view/trip-events-view.js';
-import NewEmptyListView from '../view/empty-list.js';
+import NewTripEventsView from '../view/new-trip-events-view.js';
+import NewEmptyListView from '../view/new-empty-list-view.js';
 import TripPresenter from './trip-presenter.js';
 import { SortType, SortNames, UpdateType, UserAction, FilterType } from '../data.js';
 import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';

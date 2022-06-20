@@ -1,5 +1,5 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
-import NewRoutePointCreatorView from '../view/creating-form.js';
+import NewRoutePointCreatorView from '../view/new-route-point-creator-view.js';
 import {UserAction, UpdateType} from '../data.js';
 
 export default class NewTripPresenter {
@@ -25,6 +25,25 @@ export default class NewTripPresenter {
     this.#newTripAddComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  setSaving = () => {
+    this.#newTripAddComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#newTripAddComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#newTripAddComponent.shake(resetFormState);
   };
 
   destroy = () => {
@@ -60,22 +79,5 @@ export default class NewTripPresenter {
     }
   };
 
-  setSaving = () => {
-    this.#newTripAddComponent.updateElement({
-      isDisabled: true,
-      isSaving: true,
-    });
-  };
-
-  setAborting = () => {
-    const resetFormState = () => {
-      this.#newTripAddComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
-    };
-
-    this.#newTripAddComponent.shake(resetFormState);
-  };
+  
 }

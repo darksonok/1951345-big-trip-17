@@ -13,7 +13,7 @@ const humanazieTripDate = (date, option) => {
   }
 };
 
-const dateDifference = (dateFrom, dateTo) => {
+const calculateDateDifference = (dateFrom, dateTo) => {
   const timeDifference = dayjs(dateTo).diff(dayjs(dateFrom));
   switch(true) {
     case (timeDifference < 3600000) :
@@ -54,7 +54,7 @@ export {
   filter,
   isDateEqual,
   humanazieTripDate,
-  dateDifference,
+  calculateDateDifference,
   getChosenFilter,
   sortTripsByDate,
   sortTripsByTime,
