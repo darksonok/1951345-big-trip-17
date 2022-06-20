@@ -149,9 +149,7 @@ export default class TripPresenter {
   };
 
   getTotalPrice = (trip, offers) => parseInt(trip.basePrice, 10) +
-    parseInt((offers.find((offer) => offer.type === trip.type).offers)
-      .filter((offer) => trip.offers.includes(offer.id))
-      .map((offer) => offer.price).length !== 0
+    parseInt(trip.offers.length !== 0
       ?
       (offers.find((offer) => offer.type === trip.type).offers)
         .filter((offer) => trip.offers.includes(offer.id))
