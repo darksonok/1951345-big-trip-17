@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { humanazieTripDate } from '../utils.js';
+import { humanazieTripDate, validatePriceCorrectness } from '../utils.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
 
@@ -61,7 +61,7 @@ const createNewRoutePointEditFormTemplate = (trip, destinations, offers, isDisab
         <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${trip.basePrice}" ${isDisabled ? 'disabled' : ''}>
       </div>
 
-      <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+      <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled || trip.saveButtonDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
       <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : 'Delete'}</button>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
@@ -137,10 +137,10 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
   };
 
   #setInnerHandlers = () => {
-    this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePointPrice);
+    this.element.querySelector('#event-destination-1').addEventListener('change', this.#updatePointDestination);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#UpdatePointType);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPriceCorrectnessValue);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#UpdatePointPrice);
   };
 
   #setDateTopicker = () => {
@@ -198,19 +198,19 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     this._callback.deleteClick(NewRoutePointEditFormView.parseStateToTrip(this._state));
   };
 
-  #changePoint = (evt) => {
+  #updatePointDestination = (evt) => {
     this.updateElement({
       destination: evt.target.value,
     });
   };
 
-  #changePointType = (evt) => {
+  #UpdatePointType = (evt) => {
     this.updateElement({
       type: evt.target.value,
     });
   };
 
-  #changePointPrice = (evt) => {
+  #UpdatePointPrice = (evt) => {
     this.updateElement({
       basePrice: evt.target.value,
     });
@@ -218,10 +218,10 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
 
   #checkPointOffers = () => {
     const AllOffers = this.element.querySelectorAll('.event__offer-checkbox');
-    const offersArray = [];
-    AllOffers.forEach((offer) => offer.checked ? offersArray.push(parseInt(offer.id.split('-')[3], 10)): '');
+    const offers = [];
+    AllOffers.forEach((offer) => offer.checked ? offers.push(parseInt(offer.id.split('-')[3], 10)): '');
     this.updateElement({
-      offers: offersArray,
+      offers: offers,
     });
   };
 
@@ -233,13 +233,8 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     this.setDeleteClickHandler(this._callback.deleteClick);
   };
 
-  #checkPrice = (evt) => {
-    const submitButton = this.element.querySelector('.event__save-btn');
-    if(!/[0-9]/.test(evt.target.value)) {
-      submitButton.disabled = true;
-    } else {
-      submitButton.disabled = false;
-    }
+  #checkPriceCorrectnessValue = (evt) => {
+    this._state.saveButtonDisabled = !validatePriceCorrectness(evt.target.value);
   };
 
   #dateToChangeHandler = ([userDate]) => {
@@ -265,6 +260,7 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     delete trip.isDeleting;
     delete trip.isDisabled;
     delete trip.isSaving;
+    delete trip.saveButtonDisabled;
 
     return trip;
   };

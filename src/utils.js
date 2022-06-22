@@ -1,14 +1,13 @@
 import dayjs from 'dayjs';
-import { humanazieOptions } from './data.js';
-import { FilterType } from './data.js';
+import { FilterType, HumanazieOption, DIGITS_REG_EXP, LETTERS_REG_EXP  } from './data.js';
 
 const humanazieTripDate = (date, option) => {
   switch(true) {
-    case (option === humanazieOptions.FOR_TRIP_POINT_DATE):
+    case (option === HumanazieOption.FOR_TRIP_POINT_DATE):
       return dayjs(date).format('D MMM');
-    case (option === humanazieOptions.FOR_TRIP_POINT_TIME):
+    case (option === HumanazieOption.FOR_TRIP_POINT_TIME):
       return dayjs(date).format('hh:mm');
-    case (option === humanazieOptions.FOR_EDIT_FORM):
+    case (option === HumanazieOption.FOR_EDIT_FORM):
       return dayjs(date).format('DD/MM/YY HH:mm');
   }
 };
@@ -27,15 +26,6 @@ const calculateDateDifference = (dateFrom, dateTo) => {
   }
 };
 
-const getChosenFilter = () => {
-  const allFiltersInputs = document.querySelectorAll('.trip-filters__filter-input');
-  for (let i = 0; i < allFiltersInputs.length; i++) {
-    if(allFiltersInputs[i].checked) {
-      return allFiltersInputs[i].id;
-    }
-  }
-};
-
 const filter = {
   [FilterType.EVERYTHING]: (trips) => trips.filter((trip) => (trip)),
   [FilterType.FUTURE]: (trips) => trips.filter((trip) => dayjs(trip.dateFrom) > dayjs()),
@@ -44,20 +34,20 @@ const filter = {
 
 const sortTripsByDate = (tripA, tripB) => dayjs(tripA.dateFrom).diff(dayjs(tripB.dateFrom));
 
-const sortTripsByTime = (tripA, tripB) => dayjs(tripA.dateTo).diff(dayjs(tripA.dateFrom)) - dayjs(tripB.dateTo).diff(dayjs(tripB.dateFrom));
+const sortTripsByTime = (tripA, tripB) => dayjs(tripB.dateTo).diff(dayjs(tripB.dateFrom)) - dayjs(tripA.dateTo).diff(dayjs(tripA.dateFrom));
 
-const sortTripsByPrice = (tripA, tripB) =>  tripA.totalPrice - tripB.totalPrice;
+const sortTripsByPrice = (tripA, tripB) =>  tripB.totalPrice - tripA.totalPrice;
 
-const isDateEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
+
+const validatePriceCorrectness = (priceValue) => DIGITS_REG_EXP.test(priceValue)&&!(LETTERS_REG_EXP.test(priceValue));
 
 export {
   filter,
-  isDateEqual,
   humanazieTripDate,
   calculateDateDifference,
-  getChosenFilter,
   sortTripsByDate,
   sortTripsByTime,
-  sortTripsByPrice
+  sortTripsByPrice,
+  validatePriceCorrectness
 };
 

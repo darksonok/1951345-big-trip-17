@@ -4,7 +4,7 @@ import { remove, render, RenderPosition } from '../framework/render.js';
 import NewTripEventsView from '../view/new-trip-events-view.js';
 import NewEmptyListView from '../view/new-empty-list-view.js';
 import TripPresenter from './trip-presenter.js';
-import { SortType, SortNames, UpdateType, UserAction, FilterType } from '../data.js';
+import { SORT_TYPES, SortNames, UpdateType, UserAction, FilterType } from '../data.js';
 import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';
 import { filter } from '../utils.js';
 import NewTripPresenter from './new-trip-presenter.js';
@@ -26,7 +26,7 @@ export default class TripsPresenter {
   #filterModel = null;
   #tripPresenter = new Map();
   #newTripPresenter = null;
-  #currentSortType = SortType[SortNames.DAY].NAME;
+  #currentSortType = SORT_TYPES[SortNames.DAY].NAME;
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
   #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
@@ -45,11 +45,11 @@ export default class TripsPresenter {
     const filteredTrips = filter[this.#filterType](trips);
 
     switch (this.#currentSortType) {
-      case SortType[SortNames.DAY].NAME:
+      case SORT_TYPES[SortNames.DAY].NAME:
         return filteredTrips.sort(sortTripsByDate);
-      case SortType[SortNames.TIME].NAME:
+      case SORT_TYPES[SortNames.TIME].NAME:
         return filteredTrips.sort(sortTripsByTime);
-      case SortType[SortNames.PRICE].NAME:
+      case SORT_TYPES[SortNames.PRICE].NAME:
         return filteredTrips.sort(sortTripsByPrice);
     }
     return filteredTrips;
@@ -70,7 +70,7 @@ export default class TripsPresenter {
   };
 
   createTripPoint = (cb) => {
-    this.#currentSortType = SortType[SortNames.DAY].NAME;
+    this.#currentSortType = SORT_TYPES[SortNames.DAY].NAME;
     this.#reRenderSorter();
     this.#filterModel.setFilter(UpdateType.MINOR, FilterType.EVERYTHING);
     this.#newTripPresenter.init(cb);
@@ -119,7 +119,7 @@ export default class TripsPresenter {
     this.#tripPresenter.clear();
 
     if (resetSortType) {
-      this.#currentSortType = SortType[SortNames.DAY].NAME;
+      this.#currentSortType = SORT_TYPES[SortNames.DAY].NAME;
     }
     if (this.#emptyListComponent) {
       remove(this.#emptyListComponent);
@@ -167,15 +167,18 @@ export default class TripsPresenter {
       case UpdateType.MINOR:
         this.#clearTripList();
         this.#renderTrips();
+        this.#reRenderSorter();
         break;
       case UpdateType.MAJOR:
         this.#clearTripList({resetSortType: true});
         this.#renderTrips();
+        this.#reRenderSorter();
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
         this.#renderTrips();
+        this.#reRenderSorter();
         this.#newTripPresenter = new NewTripPresenter(this.#tripComponent.element, this.#handleViewAction, this.#tripsModel);
         break;
     }
