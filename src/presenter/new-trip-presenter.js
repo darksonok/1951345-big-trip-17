@@ -1,6 +1,5 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
-import NewRoutePointCreatorView from '../view/creating-form.js';
-import {nanoid} from 'nanoid';
+import NewRoutePointCreatorView from '../view/new-route-point-creator-view.js';
 import {UserAction, UpdateType} from '../data.js';
 
 export default class NewTripPresenter {
@@ -28,6 +27,25 @@ export default class NewTripPresenter {
     document.addEventListener('keydown', this.#escKeyDownHandler);
   };
 
+  setSaving = () => {
+    this.#newTripAddComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#newTripAddComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#newTripAddComponent.shake(resetFormState);
+  };
+
   destroy = () => {
     if (this.#newTripAddComponent === null) {
       return;
@@ -45,9 +63,7 @@ export default class NewTripPresenter {
     this.#changeData(
       UserAction.ADD_TRIP,
       UpdateType.MINOR,
-      // Пока у нас нет сервера, который бы после сохранения
-      // выдывал честный id задачи, нам нужно позаботиться об этом самим
-      {id: nanoid(), ...trip},
+      trip,
     );
     this.destroy();
   };
@@ -62,4 +78,5 @@ export default class NewTripPresenter {
       this.destroy();
     }
   };
+
 }
