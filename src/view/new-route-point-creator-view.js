@@ -1,4 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import { validatePriceCorrectness } from '../utils.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
 
@@ -54,7 +55,7 @@ const createNewRoutePointCreatorTemplate = (blankTrip, destinations, offers, isD
         <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${blankTrip.basePrice}" ${isDisabled ? 'disabled' : ''}>
       </div>
   
-      <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'isSaving...' : 'Save'}</button>
+      <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled || blankTrip.saveButtonDisabled ? 'disabled' : ''}>${isSaving ? 'isSaving...' : 'Save'}</button>
       <button class="event__reset-btn" type="reset">Cancel</button>
     </header>
     <section class="event__details">
@@ -153,10 +154,10 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
   };
 
   #setInnerHandlers = () => {
-    this.element.querySelector('#event-destination-1').addEventListener('change', this.#changePoint);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#changePointType);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPrice);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#changePointPrice);
+    this.element.querySelector('#event-destination-1').addEventListener('change', this.#UpdatePointDestination);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#UpdatePointType);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPriceCorrectnessValue);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#UpdatePointPrice);
   };
 
   #setDateTopicker = () => {
@@ -199,19 +200,19 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     this._callback.deleteClick(NewRoutePointCreatorView.parseStateToTrip(this._state));
   };
 
-  #changePoint = (evt) => {
+  #UpdatePointDestination = (evt) => {
     this.updateElement({
       destination: evt.target.value,
     });
   };
 
-  #changePointType = (evt) => {
+  #UpdatePointType = (evt) => {
     this.updateElement({
       type: evt.target.value,
     });
   };
 
-  #changePointPrice = (evt) => {
+  #UpdatePointPrice = (evt) => {
     this.updateElement({
       basePrice: evt.target.value,
     });
@@ -219,10 +220,10 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
 
   #checkPointOffers = () => {
     const AllOffers = this.element.querySelectorAll('.event__offer-checkbox');
-    const offersArray = [];
-    AllOffers.forEach((offer) => offer.checked ? offersArray.push(parseInt(offer.id.split('-')[3], 10)): '');
+    const offers = [];
+    AllOffers.forEach((offer) => offer.checked ? offers.push(parseInt(offer.id.split('-')[3], 10)): '');
     this.updateElement({
-      offers: offersArray,
+      offers: offers,
     });
   };
 
@@ -234,13 +235,9 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     this.setDeleteClickHandler(this._callback.deleteClick);
   };
 
-  #checkPrice = (evt) => {
-    const submitButton = this.element.querySelector('.event__save-btn');
-    if(!/[0-9]/.test(evt.target.value)) {
-      submitButton.disabled = true;
-    } else {
-      submitButton.disabled = false;
-    }
+  #checkPriceCorrectnessValue = (evt) => {
+    // eslint-disable-next-line no-unused-expressions
+    !validatePriceCorrectness(evt.target.value) ? this._state.saveButtonDisabled = true : this._state.saveButtonDisabled = false;
   };
 
   #dateToChangeHandler = ([userDate]) => {
@@ -266,6 +263,7 @@ export default class NewRoutePointCreatorView extends AbstractStatefulView {
     delete trip.isDeleting;
     delete trip.isDisabled;
     delete trip.isSaving;
+    delete this.saveButtonDisabled;
 
     return trip;
   };

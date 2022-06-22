@@ -4,7 +4,7 @@ import FilterPresenter from './presenter/filter-presenter.js';
 import FilterModel from './model/filter-model';
 import NewTripPointButton from './view/new-trip-point-button.js';
 import { render } from './framework/render.js';
-import TripsApiService from './trip-api-service.js';
+import TripsApiService from './trips-api-service.js';
 
 
 const AUTHORIZATION = 'Basic FA22180B05B179C0154C394F137B2415';
