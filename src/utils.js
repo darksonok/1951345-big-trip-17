@@ -26,15 +26,6 @@ const calculateDateDifference = (dateFrom, dateTo) => {
   }
 };
 
-const getChosenFilter = () => {
-  const allFiltersInputs = document.querySelectorAll('.trip-filters__filter-input');
-  for (let i = 0; i < allFiltersInputs.length; i++) {
-    if(allFiltersInputs[i].checked) {
-      return allFiltersInputs[i].id;
-    }
-  }
-};
-
 const filter = {
   [FilterType.EVERYTHING]: (trips) => trips.filter((trip) => (trip)),
   [FilterType.FUTURE]: (trips) => trips.filter((trip) => dayjs(trip.dateFrom) > dayjs()),
@@ -47,16 +38,13 @@ const sortTripsByTime = (tripA, tripB) => dayjs(tripB.dateTo).diff(dayjs(tripB.d
 
 const sortTripsByPrice = (tripA, tripB) =>  tripB.totalPrice - tripA.totalPrice;
 
-const isDateEqual = (dateA, dateB) => (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
 
 const validatePriceCorrectness = (priceValue) => DIGITS_REG_EXP.test(priceValue)&&!(LETTERS_REG_EXP.test(priceValue));
 
 export {
   filter,
-  isDateEqual,
   humanazieTripDate,
   calculateDateDifference,
-  getChosenFilter,
   sortTripsByDate,
   sortTripsByTime,
   sortTripsByPrice,

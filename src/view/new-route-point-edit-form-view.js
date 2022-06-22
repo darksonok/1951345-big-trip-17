@@ -234,8 +234,7 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
   };
 
   #checkPriceCorrectnessValue = (evt) => {
-    // eslint-disable-next-line no-unused-expressions
-    !validatePriceCorrectness(evt.target.value) ? this._state.saveButtonDisabled = true : this._state.saveButtonDisabled = false;
+    this._state.saveButtonDisabled = !validatePriceCorrectness(evt.target.value);
   };
 
   #dateToChangeHandler = ([userDate]) => {

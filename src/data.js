@@ -1,5 +1,3 @@
-const NUMBER_OF_TRIP_POINTS = 3;
-const NUMBER_OF_TRIPS = 15;
 const HumanazieOption = {
   FOR_EDIT_FORM: 'editOption',
   FOR_TRIP_POINT_DATE: 'tripPointDate',
@@ -17,7 +15,8 @@ const EmptyListMessage = {
   FUTURE: 'There are no future events now',
   PAST: 'There are no past events now'
 };
-const SortTypes = [
+
+const SORT_TYPES = [
   {
     NAME: 'day',
     OPTION: ''
@@ -68,9 +67,7 @@ export {
   UserAction,
   UpdateType,
   SortNames,
-  SortTypes,
-  NUMBER_OF_TRIP_POINTS,
-  NUMBER_OF_TRIPS,
+  SORT_TYPES,
   HumanazieOption,
   EmptyListMessage,
   FilterType,
