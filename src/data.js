@@ -39,7 +39,7 @@ const SORT_TYPES = [
   }
 ];
 
-const SortNames = {
+const SortName = {
   DAY: '0',
   EVENT: '1',
   TIME: '2',
@@ -66,7 +66,7 @@ const LETTERS_REG_EXP = /[a-zA-Z]/;
 export {
   UserAction,
   UpdateType,
-  SortNames,
+  SortName,
   SORT_TYPES,
   HumanazieOption,
   EmptyListMessage,

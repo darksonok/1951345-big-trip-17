@@ -4,7 +4,7 @@ import { remove, render, RenderPosition } from '../framework/render.js';
 import NewTripEventsView from '../view/new-trip-events-view.js';
 import NewEmptyListView from '../view/new-empty-list-view.js';
 import TripPresenter from './trip-presenter.js';
-import { SORT_TYPES, SortNames, UpdateType, UserAction, FilterType } from '../data.js';
+import { SORT_TYPES, SortName, UpdateType, UserAction, FilterType } from '../data.js';
 import { sortTripsByDate, sortTripsByTime, sortTripsByPrice } from '../utils.js';
 import { filter } from '../utils.js';
 import NewTripPresenter from './new-trip-presenter.js';
@@ -26,7 +26,7 @@ export default class TripsPresenter {
   #filterModel = null;
   #tripPresenter = new Map();
   #newTripPresenter = null;
-  #currentSortType = SORT_TYPES[SortNames.DAY].NAME;
+  #currentSortType = SORT_TYPES[SortName.DAY].NAME;
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
   #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
@@ -45,11 +45,11 @@ export default class TripsPresenter {
     const filteredTrips = filter[this.#filterType](trips);
 
     switch (this.#currentSortType) {
-      case SORT_TYPES[SortNames.DAY].NAME:
+      case SORT_TYPES[SortName.DAY].NAME:
         return filteredTrips.sort(sortTripsByDate);
-      case SORT_TYPES[SortNames.TIME].NAME:
+      case SORT_TYPES[SortName.TIME].NAME:
         return filteredTrips.sort(sortTripsByTime);
-      case SORT_TYPES[SortNames.PRICE].NAME:
+      case SORT_TYPES[SortName.PRICE].NAME:
         return filteredTrips.sort(sortTripsByPrice);
     }
     return filteredTrips;
@@ -70,7 +70,7 @@ export default class TripsPresenter {
   };
 
   createTripPoint = (cb) => {
-    this.#currentSortType = SORT_TYPES[SortNames.DAY].NAME;
+    this.#currentSortType = SORT_TYPES[SortName.DAY].NAME;
     this.#reRenderSorter();
     this.#filterModel.setFilter(UpdateType.MINOR, FilterType.EVERYTHING);
     this.#newTripPresenter.init(cb);
@@ -119,7 +119,7 @@ export default class TripsPresenter {
     this.#tripPresenter.clear();
 
     if (resetSortType) {
-      this.#currentSortType = SORT_TYPES[SortNames.DAY].NAME;
+      this.#currentSortType = SORT_TYPES[SortName.DAY].NAME;
     }
     if (this.#emptyListComponent) {
       remove(this.#emptyListComponent);

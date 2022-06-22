@@ -38,7 +38,6 @@ const sortTripsByTime = (tripA, tripB) => dayjs(tripB.dateTo).diff(dayjs(tripB.d
 
 const sortTripsByPrice = (tripA, tripB) =>  tripB.totalPrice - tripA.totalPrice;
 
-
 const validatePriceCorrectness = (priceValue) => DIGITS_REG_EXP.test(priceValue)&&!(LETTERS_REG_EXP.test(priceValue));
 
 export {

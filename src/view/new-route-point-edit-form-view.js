@@ -138,9 +138,9 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
 
   #setInnerHandlers = () => {
     this.element.querySelector('#event-destination-1').addEventListener('change', this.#updatePointDestination);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#UpdatePointType);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#updatePointType);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#checkPriceCorrectnessValue);
-    this.element.querySelector('.event__input--price').addEventListener('change', this.#UpdatePointPrice);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#updatePointPrice);
   };
 
   #setDateTopicker = () => {
@@ -204,13 +204,13 @@ export default class NewRoutePointEditFormView extends AbstractStatefulView {
     });
   };
 
-  #UpdatePointType = (evt) => {
+  #updatePointType = (evt) => {
     this.updateElement({
       type: evt.target.value,
     });
   };
 
-  #UpdatePointPrice = (evt) => {
+  #updatePointPrice = (evt) => {
     this.updateElement({
       basePrice: evt.target.value,
     });
